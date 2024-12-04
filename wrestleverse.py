@@ -7,7 +7,7 @@ import pandas as pd
 import random
 import os
 import pyodbc
-from openai import OpenAI
+import openai
 import datetime
 import logging
 
@@ -29,10 +29,11 @@ class WrestleverseApp:
         self.client = None
         self.load_settings()
         if self.api_key:
-            self.client = OpenAI(api_key=self.api_key)
+            openai.api_key = self.api_key
         self.skill_presets = []
         self.load_skill_presets()
         self.wrestlers = []
+        self.companies = []
         self.setup_main_menu()
 
     def setup_main_menu(self):
@@ -40,8 +41,10 @@ class WrestleverseApp:
             widget.destroy()
         title_label = ttk.Label(self.root, text="Wrestleverse", font=("Helvetica", 20))
         title_label.pack(pady=20)
-        generate_btn = ttk.Button(self.root, text="Generate Wrestlers", command=self.open_wrestler_generator)
-        generate_btn.pack(pady=20)
+        generate_wrestlers_btn = ttk.Button(self.root, text="Generate Wrestlers", command=self.open_wrestler_generator)
+        generate_wrestlers_btn.pack(pady=10)
+        generate_company_btn = ttk.Button(self.root, text="Generate Company", command=self.open_company_generator)
+        generate_company_btn.pack(pady=10)
         skill_presets_btn = ttk.Button(self.root, text="Skill Presets", command=self.open_skill_presets)
         skill_presets_btn.pack(pady=10)
         settings_btn = ttk.Button(self.root, text="⚙ Settings", command=self.open_settings)
@@ -103,8 +106,6 @@ class WrestleverseApp:
         if not self.api_key:
             messagebox.showerror("Error", "Please set your API key in settings before generating wrestlers.")
             return
-        if not self.client:
-            self.client = OpenAI(api_key=self.api_key)
         self.status_label.config(text="Status: Generating wrestlers...")
         self.root.update_idletasks()
         try:
@@ -457,6 +458,113 @@ class WrestleverseApp:
         finally:
             self.root.update_idletasks()
 
+    def open_company_generator(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        title_label = ttk.Label(self.root, text="Company Generator", font=("Helvetica", 16))
+        title_label.pack(pady=10)
+        add_company_btn = ttk.Button(self.root, text="Add Company", command=self.add_company_form)
+        add_company_btn.pack(pady=10)
+        self.companies_frame = ttk.Frame(self.root)
+        self.companies_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        self.status_label = ttk.Label(self.root, text="Status: Waiting to generate companies...")
+        self.status_label.pack(pady=10)
+        generate_btn = ttk.Button(self.root, text="Generate Companies", command=self.generate_companies)
+        generate_btn.pack(side="bottom", pady=10)
+        back_btn = ttk.Button(self.root, text="Back", command=self.setup_main_menu)
+        back_btn.pack(side="bottom", pady=10)
+
+    def add_company_form(self):
+        company_frame = ttk.Frame(self.companies_frame, relief="ridge", borderwidth=2)
+        company_frame.pack(fill="x", pady=5)
+        name_label = ttk.Label(company_frame, text="Name:")
+        name_label.grid(row=0, column=0, padx=5, pady=5)
+        name_entry = ttk.Entry(company_frame)
+        name_entry.grid(row=0, column=1, padx=5, pady=5)
+        description_label = ttk.Label(company_frame, text="Description:")
+        description_label.grid(row=1, column=0, padx=5, pady=5)
+        description_entry = ttk.Entry(company_frame, width=40)
+        description_entry.grid(row=1, column=1, columnspan=3, padx=5, pady=5)
+        size_label = ttk.Label(company_frame, text="Size:")
+        size_label.grid(row=2, column=0, padx=5, pady=5)
+        size_var = tk.StringVar(value="Medium")
+        size_dropdown = ttk.Combobox(company_frame, textvariable=size_var, values=["Tiny", "Small", "Medium", "Large"])
+        size_dropdown.grid(row=2, column=1, padx=5, pady=5)
+        remove_btn = ttk.Button(company_frame, text="❌", command=lambda: self.remove_company_form(company_frame))
+        remove_btn.grid(row=0, column=4, padx=5, pady=5)
+        self.companies.append({
+            "frame": company_frame,
+            "name": name_entry,
+            "description": description_entry,
+            "size": size_var
+        })
+
+    def remove_company_form(self, company_frame):
+        company_frame.destroy()
+        self.companies = [company for company in self.companies if company["frame"] != company_frame]
+
+    def generate_companies(self):
+        if not self.api_key:
+            messagebox.showerror("Error", "Please set your API key in settings before generating companies.")
+            return
+        self.status_label.config(text="Status: Generating companies...")
+        self.root.update_idletasks()
+        try:
+            companies_data = []
+            total_companies = len(self.companies)
+            for index, company in enumerate(self.companies, start=1):
+                self.status_label.config(text=f"Status: Generating company {index}/{total_companies}...")
+                self.root.update_idletasks()
+                name = company["name"].get().strip()
+                description = company["description"].get().strip()
+                size = company["size"].get().strip()
+                if not name:
+                    name = self.generate_company_name(description=description, size=size)
+                if not description:
+                    description = self.generate_company_description(name=name, size=size)
+                companies_data.append({
+                    "Name": name,
+                    "Description": description,
+                    "Size": size
+                })
+            self.status_label.config(text="Status: Companies generated successfully!")
+            # For now, print the companies data
+            print(companies_data)
+        except Exception as e:
+            error_message = f"Status: Error - {str(e)}"
+            self.status_label.config(text=error_message)
+            logging.error(error_message, exc_info=True)
+        finally:
+            self.root.update_idletasks()
+
+    def generate_company_name(self, description=None, size=None):
+        prompt = "Generate a name for a professional wrestling company."
+        if description:
+            prompt += f" The company's style or theme is: {description}."
+        if size:
+            prompt += f" The company is of {size.lower()} size."
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
+        )
+        return response.choices[0].message.content.strip()
+
+    def generate_company_description(self, name=None, size=None):
+        prompt = "Generate a description for a professional wrestling company."
+        if name:
+            prompt += f" The company's name is {name}."
+        if size:
+            prompt += f" The company is of {size.lower()} size."
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
+        )
+        return response.choices[0].message.content.strip()
+
     def ensure_byte(self, value):
         return max(0, min(255, int(value)))
 
@@ -485,7 +593,7 @@ class WrestleverseApp:
             prompt += f" The wrestler's gimmick or description is: {description}."
         if gender:
             prompt += f" The wrestler is {gender}."
-        response = self.client.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "user", "content": prompt}
@@ -501,7 +609,7 @@ class WrestleverseApp:
             prompt += f" Description: {description}."
         if gender:
             prompt += f" Gender: {gender}."
-        response = self.client.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "user", "content": prompt}
@@ -519,7 +627,7 @@ class WrestleverseApp:
             prompt += f" Description: {description}."
         if skill_preset_name:
             prompt += f" Their wrestling style is best described as {skill_preset_name}."
-        response = self.client.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "user", "content": prompt}
@@ -537,7 +645,7 @@ class WrestleverseApp:
             prompt += f"Gender: {gender}\n"
         prompt += "Available Skill Presets: " + ", ".join(preset_names) + "\n"
         prompt += "Provide only the name of the most suitable skill preset."
-        response = self.client.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "user", "content": prompt}
@@ -611,7 +719,7 @@ class WrestleverseApp:
             json.dump(settings, settings_file)
         messagebox.showinfo("Settings", "Settings saved successfully!")
         if self.api_key:
-            self.client = OpenAI(api_key=self.api_key)
+            openai.api_key = self.api_key
         else:
             self.client = None
 
