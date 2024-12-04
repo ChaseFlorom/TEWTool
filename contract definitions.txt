@@ -1,0 +1,81 @@
+UID - Long Integer - next iterating UID from the Access DB
+FedUID - Long Integer - the foreign key to the fed UID
+WorkerUID - Long Integer - the foreign key to the worker - 
+Name - Text (Max Length: 30) - the worker's name
+Shortname - Text (Max Length: 20) - the worker's shortname
+Picture - Text (Max Length: 35) - the worker's picture
+CompetesIn - Byte - (1 if male, 2 if female)
+Face - Yes/No True if face, false if heel (this can be sent to ChatGPT to determine, but make sure it just returns 'face' or 'heel' and have a default if it doesn't.
+Division - Byte - 0 
+Manager - Long Integer - 0 
+Moveset - Long Integer - 0
+WrittenContract - Yes/No - true
+ExclusiveContract - Yes/No - Make this another dropdown in the worker generation, true, false, or random. default is random.
+TouringContract - Yes/No - false
+PaidMonthly - Yes/No true
+OnLoan - Yes/No false
+Developmental - Yes/No false 
+PrimaryUsage - Byte 0 
+SecondaryUsage - Long Integer 0
+ExpectedShows - Byte 0
+BonusAmount - Byte 0
+BonusType - Byte 0
+Creative - Yes/No false
+HiringVeto - Yes/No false
+WageMatch - Yes/No false 
+IronClad - Yes/No true only if ExclusiveContract is true
+ContractBeganDate - Date/Time (random date between 2010-2022)
+Daysleft - Integer (random number between 7-300)
+Dateslength - Integer 0
+DatesLeft - Integer 0
+ContractDebutDate - Date/Time 1/1/1666
+Amount - Long Integer -1
+Downside - Long Integer -1
+Brand - Byte 0
+Mask - Integer - 0
+ContractMomentum - Integer randum number 1-5
+Last_Turn - Integer 0 
+Travel - Yes/No yes
+Position_Wrestler - Yes/No (no)
+Position_Occasional - Yes/No (no)
+Position_Referee - Yes/No (no)
+Position_Announcer - Yes/No (no)
+Position_Colour - Yes/No (no)
+Position_Manager - Yes/No (no)
+Position_Personality - Yes/No (no)
+Position_Roadagent - Yes/No (no)
+Merch - Byte 200
+PlasterCaster_Gimmick - Text (Max Length: 30) whatever the person's face gimmick is
+PlasterCaster_Rating - Integer random - either 0, 3, 4, 5, 6
+PlasterCaster_Lifespan - Integer random 0-4
+PlasterCaster_Byte1 - Byte 0
+PlasterCaster_Byte2 - Byte 0
+PlasterCaster_Byte3 - Byte 0
+PlasterCaster_Byte4 - Byte 0
+PlasterCaster_Byte5 - Byte 0
+PlasterCaster_Byte6 - Byte 0
+PlasterCaster_Bool1 - Yes/No (NO)
+PlasterCaster_Bool2 - Yes/No (NO)
+PlasterCaster_Bool3 - Yes/No (NO)
+PlasterCaster_Bool4 - Yes/No (NO)
+PlasterCaster_Bool5 - Yes/No (NO)
+PlasterCaster_Bool6 - Yes/No (NO)
+PlasterCaster_Bool7 - Yes/No (NO)
+PlasterCaster_Bool8 - Yes/No (NO)
+PlasterCaster_Bool9 - Yes/No (NO)
+PlasterCaster_Bool10 - Yes/No (NO)
+PlasterCaster_Bool11 - Yes/No (NO)
+PlasterCaster_Bool12 - Yes/No (NO)
+PlasterCaster_Bool13 - Yes/No (NO)
+PlasterCaster_Bool14 - Yes/No (NO)
+PlasterCaster_Bool15 - Yes/No (NO)
+PlasterCaster_Bool16 - Yes/No (NO)
+PlasterCaster_Bool17 - Yes/No (NO)
+PlasterCaster_Bool18 - Yes/No (NO)
+PlasterCaster_Bool19 - Yes/No (NO)
+PlasterCaster_Bool20 - Yes/No (NO)
+PlasterCaster_Bool21 - Yes/No (NO)
+PlasterCaster_Bool22 - Yes/No (NO)
+PlasterCaster_Bool23 - Yes/No (NO)
+PlasterCaster_Bool24 - Yes/No (NO)
+PlasterCaster_Bool25 - Yes/No (NO)
