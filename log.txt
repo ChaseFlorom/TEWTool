@@ -1,0 +1,38 @@
+2024-12-03 19:39:12,215 - ERROR - Status: Error - ('07002', '[07002] [Microsoft][ODBC Microsoft Access Driver] Too few parameters. Expected 1. (-3010) (SQLExecDirectW)')
+Traceback (most recent call last):
+  File "D:\1.) Creative\Coding Solutions\Wrestleverse Generation\wrestleverse.py", line 122, in generate_wrestlers
+    cursor.execute("SELECT MAX(WorkerID) FROM tblWorker")
+pyodbc.Error: ('07002', '[07002] [Microsoft][ODBC Microsoft Access Driver] Too few parameters. Expected 1. (-3010) (SQLExecDirectW)')
+2024-12-03 19:44:10,364 - ERROR - Status: Error - 
+
+You tried to access openai.ChatCompletion, but this is no longer supported in openai>=1.0.0 - see the README at https://github.com/openai/openai-python for the API.
+
+You can run `openai migrate` to automatically upgrade your codebase to use the 1.0.0 interface. 
+
+Alternatively, you can pin your installation to the old version, e.g. `pip install openai==0.28`
+
+A detailed migration guide is available here: https://github.com/openai/openai-python/discussions/742
+Traceback (most recent call last):
+  File "D:\1.) Creative\Coding Solutions\Wrestleverse Generation\wrestleverse.py", line 219, in generate_wrestlers
+    name = self.generate_name(description=description, gender=gender)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\1.) Creative\Coding Solutions\Wrestleverse Generation\wrestleverse.py", line 486, in generate_name
+    response = openai.ChatCompletion.create(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\floro\miniconda33\Lib\site-packages\openai\lib\_old_api.py", line 39, in __call__
+    raise APIRemovedInV1(symbol=self._symbol)
+openai.lib._old_api.APIRemovedInV1: 
+
+You tried to access openai.ChatCompletion, but this is no longer supported in openai>=1.0.0 - see the README at https://github.com/openai/openai-python for the API.
+
+You can run `openai migrate` to automatically upgrade your codebase to use the 1.0.0 interface. 
+
+Alternatively, you can pin your installation to the old version, e.g. `pip install openai==0.28`
+
+A detailed migration guide is available here: https://github.com/openai/openai-python/discussions/742
+
+2024-12-03 19:45:53,930 - ERROR - Status: Error - ('HYS22', "[HYS22] [Microsoft][ODBC Microsoft Access Driver] The INSERT INTO statement contains the following unknown field name: 'WorkerBio'. Make sure you have typed the name correctly, and try the operation again. (-1507) (SQLParamData)")
+Traceback (most recent call last):
+  File "D:\1.) Creative\Coding Solutions\Wrestleverse Generation\wrestleverse.py", line 356, in generate_wrestlers
+    cursor.execute(sql_insert_bio, bio_row)
+pyodbc.Error: ('HYS22', "[HYS22] [Microsoft][ODBC Microsoft Access Driver] The INSERT INTO statement contains the following unknown field name: 'WorkerBio'. Make sure you have typed the name correctly, and try the operation again. (-1507) (SQLParamData)")
