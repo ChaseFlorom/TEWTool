@@ -26,6 +26,7 @@ class WrestleverseApp:
         self.uid_start = 1
         self.bio_prompt = "Create a biography for a professional wrestler."
         self.access_db_path = ""
+        self.pictures_path = ""
         self.client = None
         self.load_settings()
         if self.api_key:
@@ -229,6 +230,42 @@ class WrestleverseApp:
                     logging.error(f"Error saving to Access database: {e}", exc_info=True)
                     logging.debug(f"Last SQL statement attempted: {sql_insert_company}")
                     messagebox.showerror("Error", f"Could not save to Access database: {str(e)}")
+
+            # Save to Excel
+            try:
+                logging.debug("Attempting to save data to Excel file.")
+                companies_df = pd.DataFrame(companies_data, columns=companies_columns)
+                bio_df = pd.DataFrame(bio_data, columns=["UID", "Bio"])
+                notes_df = pd.DataFrame(notes_data)  # Add this line
+                
+                excel_path = "wrestleverse_companies.xlsx"
+                with pd.ExcelWriter(excel_path, engine='xlsxwriter') as writer:
+                    companies_df.to_excel(writer, sheet_name="Companies", index=False)
+                    bio_df.to_excel(writer, sheet_name="Bios", index=False)
+                    notes_df.to_excel(writer, sheet_name="Notes", index=False)  # This will now include all columns
+                
+                logging.debug(f"Excel file saved successfully to {excel_path}")
+                messagebox.showinfo("Success", f"Companies saved to {excel_path}")
+            except Exception as e:
+                logging.error(f"Error saving Excel file: {e}", exc_info=True)
+                messagebox.showerror("Error", f"Could not save Excel file: {str(e)}")
+
+            # Inside the try block, just before saving to Excel:
+            for note in notes_data:
+                try:
+                    # Get logo description from GPT
+                    logo_prompt = (
+                        f"For a professional wrestling company named '{note['Name']}' "
+                        f"with the following description: '{note['Description']}', "
+                        f"describe in a single sentence what their logo might look like. "
+                        f"Focus on style, colors, and iconic elements."
+                    )
+                    logo_description = self.get_response_from_gpt(logo_prompt)
+                    note['logo_description'] = logo_description
+                    logging.debug(f"Generated logo description for {note['Name']}: {logo_description}")
+                except Exception as e:
+                    logging.error(f"Error generating logo description: {e}")
+                    note['logo_description'] = ""
 
             # Save to Excel
             try:
@@ -682,7 +719,7 @@ class WrestleverseApp:
                                 [PlasterCaster_FaceBasis], [PlasterCaster_Heel], [PlasterCaster_HeelBasis],
                                 [CareerGoal]
                             ) VALUES (
-                                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                             )
                         """
 
@@ -982,7 +1019,7 @@ class WrestleverseApp:
                 bio_df = pd.DataFrame(bio_data, columns=["UID", "Bio"])
                 skills_df = pd.DataFrame(skills_data)
                 contracts_df = pd.DataFrame(contract_data)
-                notes_df = pd.DataFrame(notes_data)  # Add this line
+                notes_df = pd.DataFrame(notes_data)
                 
                 excel_path = "wrestleverse_workers.xlsx"
                 with pd.ExcelWriter(excel_path) as writer:
@@ -990,7 +1027,7 @@ class WrestleverseApp:
                     bio_df.to_excel(writer, sheet_name="Bios", index=False)
                     skills_df.to_excel(writer, sheet_name="Skills", index=False)
                     contracts_df.to_excel(writer, sheet_name="Contracts", index=False)
-                    notes_df.to_excel(writer, sheet_name="Notes", index=False)  # Add this line
+                    notes_df.to_excel(writer, sheet_name="Notes", index=False)
                 
                 logging.debug(f"Successfully saved data to Excel file at {excel_path}")
                 messagebox.showinfo("Success", f"Wrestlers saved to {excel_path}")
@@ -1004,7 +1041,46 @@ class WrestleverseApp:
                 result = cursor.fetchone()
                 contract_uid = result[0] + 1 if result[0] else 1
 
+            # Inside the try block, just before saving to Excel:
+            for note in notes_data:
+                try:
+                    # Get physical description from GPT
+                    physical_prompt = (
+                        f"Based on this wrestler's details:\n"
+                        f"Name: {note['Name']}\n"
+                        f"Description: {note['Description']}\n"
+                        f"Gender: {note['Gender']}\n"
+                        f"Please provide a single sentence describing their physical appearance. "
+                        f"Focus on height, build, and distinctive features."
+                    )
+                    physical_description = self.get_response_from_gpt(physical_prompt)
+                    note['physical_description'] = physical_description
+                    logging.debug(f"Generated physical description for {note['Name']}: {physical_description}")
+                except Exception as e:
+                    logging.error(f"Error generating physical description: {e}")
+                    note['physical_description'] = ""
+
+            # Save to Excel
+            try:
+                logging.debug("Attempting to save data to Excel file.")
+                #companies_df = pd.DataFrame(companies_data, columns=companies_columns)
+                bio_df = pd.DataFrame(bio_data, columns=["UID", "Bio"])
+                notes_df = pd.DataFrame(notes_data)  # Add this line
+                
+                excel_path = "wrestleverse_companies.xlsx"
+                with pd.ExcelWriter(excel_path, engine='xlsxwriter') as writer:
+                    #companies_df.to_excel(writer, sheet_name="Companies", index=False)
+                    bio_df.to_excel(writer, sheet_name="Bios", index=False)
+                    notes_df.to_excel(writer, sheet_name="Notes", index=False)  # This will now include all columns
+                
+                logging.debug(f"Excel file saved successfully to {excel_path}")
+                messagebox.showinfo("Success", f"Companies saved to {excel_path}")
+            except Exception as e:
+                logging.error(f"Error saving Excel file: {e}", exc_info=True)
+                messagebox.showerror("Error", f"Could not save Excel file: {str(e)}")
+
         except Exception as e:
+            logging.error(f"Unhandled error in generate_wrestlers: {e}", exc_info=True)
             error_message = f"Error generating wrestlers: {str(e)}"
             logging.error(error_message, exc_info=True)
             self.status_label.config(text=f"Status: Error - {str(e)}")
@@ -1195,28 +1271,47 @@ class WrestleverseApp:
             widget.destroy()
         settings_title = ttk.Label(self.root, text="Settings", font=("Helvetica", 16))
         settings_title.pack(pady=10)
+        
+        # API Key
         api_key_label = ttk.Label(self.root, text="ChatGPT API Key:")
         api_key_label.pack(pady=5)
         self.api_key_var = tk.StringVar(value=self.api_key)
         api_key_entry = ttk.Entry(self.root, textvariable=self.api_key_var, width=50)
         api_key_entry.pack(pady=5)
+        
+        # UID Start
         uid_start_label = ttk.Label(self.root, text="UID Start:")
         uid_start_label.pack(pady=5)
         self.uid_start_var = tk.IntVar(value=self.uid_start)
         uid_start_entry = ttk.Entry(self.root, textvariable=self.uid_start_var, width=10)
         uid_start_entry.pack(pady=5)
+        
+        # Bio Prompt
         bio_prompt_label = ttk.Label(self.root, text="Bio Prompt:")
         bio_prompt_label.pack(pady=5)
         self.bio_prompt_var = tk.StringVar(value=self.bio_prompt)
         bio_prompt_entry = ttk.Entry(self.root, textvariable=self.bio_prompt_var, width=50)
         bio_prompt_entry.pack(pady=5)
+        
+        # Access DB Path
         access_db_label = ttk.Label(self.root, text="Access Database Path (Optional):")
         access_db_label.pack(pady=5)
         self.access_db_var = tk.StringVar(value=self.access_db_path)
         access_db_entry = ttk.Entry(self.root, textvariable=self.access_db_var, width=50)
         access_db_entry.pack(pady=5)
-        browse_btn = ttk.Button(self.root, text="Browse", command=self.browse_access_db)
-        browse_btn.pack(pady=5)
+        browse_db_btn = ttk.Button(self.root, text="Browse", command=self.browse_access_db)
+        browse_db_btn.pack(pady=5)
+        
+        # Pictures Path
+        pictures_label = ttk.Label(self.root, text="Pictures Path (Optional):")
+        pictures_label.pack(pady=5)
+        self.pictures_var = tk.StringVar(value=self.pictures_path)
+        pictures_entry = ttk.Entry(self.root, textvariable=self.pictures_var, width=50)
+        pictures_entry.pack(pady=5)
+        browse_pics_btn = ttk.Button(self.root, text="Browse", command=self.browse_pictures_path)
+        browse_pics_btn.pack(pady=5)
+        
+        # Save Button
         save_btn = ttk.Button(self.root, text="Save", command=self.save_settings)
         save_btn.pack(pady=10)
         back_btn = ttk.Button(self.root, text="Back", command=self.setup_main_menu)
@@ -1232,11 +1327,13 @@ class WrestleverseApp:
         self.uid_start = self.uid_start_var.get()
         self.bio_prompt = self.bio_prompt_var.get()
         self.access_db_path = self.access_db_var.get()
+        self.pictures_path = self.pictures_var.get()
         settings = {
             "api_key": self.api_key,
             "uid_start": self.uid_start,
             "bio_prompt": self.bio_prompt,
-            "access_db_path": self.access_db_path
+            "access_db_path": self.access_db_path,
+            "pictures_path": self.pictures_path
         }
         with open("settings.json", "w") as settings_file:
             json.dump(settings, settings_file)
@@ -1254,11 +1351,13 @@ class WrestleverseApp:
                 self.uid_start = settings.get("uid_start", 1)
                 self.bio_prompt = settings.get("bio_prompt", "Create a biography for a professional wrestler.")
                 self.access_db_path = settings.get("access_db_path", "")
+                self.pictures_path = settings.get("pictures_path", "")
         except FileNotFoundError:
             self.api_key = ""
             self.uid_start = 1
             self.bio_prompt = "Create a biography for a professional wrestler."
             self.access_db_path = ""
+            self.pictures_path = ""
 
     def open_skill_presets(self):
         for widget in self.root.winfo_children():
