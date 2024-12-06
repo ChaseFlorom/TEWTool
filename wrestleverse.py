@@ -201,7 +201,7 @@ class WrestleverseApp:
                             (?, ?, ?, ?, ?, ?, ?, ?,
                              ?, ?, ?, ?, ?, ?, ?, ?, ?,
                              ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                             ?, ?, ?, ?, ?, ?, ?, ?,
+                             ?, ?, ?, ?, ?, ?,
                              ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """
                         logging.debug(f"Executing SQL with values: {company_row}")
@@ -362,9 +362,13 @@ class WrestleverseApp:
         gender_dropdown.grid(row=0, column=3, padx=5, pady=5)
         company_label = ttk.Label(wrestler_frame, text="Company:")
         company_label.grid(row=1, column=0, padx=5, pady=5)
-        company_values = self.get_companies()
+        
+        # Get company names for dropdown (just the names, not the UIDs)
+        companies = self.get_companies()
+        company_names = ["Random"] + [company[1] for company in companies]  # Only use company names
+        
         company_var = tk.StringVar(value="Random")
-        company_dropdown = ttk.Combobox(wrestler_frame, textvariable=company_var, values=company_values)
+        company_dropdown = ttk.Combobox(wrestler_frame, textvariable=company_var, values=company_names)
         company_dropdown.grid(row=1, column=1, padx=5, pady=5)
         exclusive_label = ttk.Label(wrestler_frame, text="Exclusive:")
         exclusive_label.grid(row=1, column=2, padx=5, pady=5)
@@ -402,18 +406,16 @@ class WrestleverseApp:
             messagebox.showerror("Error", "Please set your API key in settings before generating wrestlers.")
             return
 
-        self.status_label.config(text="Status: Generating wrestlers...")
-        self.root.update_idletasks()
-
         try:
             workers_data = []
             bio_data = []
             skills_data = []
             contract_data = []
-            notes_data = []
-
-            # Get next available UID
-            uid = self.uid_start
+            
+            # Get starting UIDs from settings
+            uid = self.uid_start  # For workers
+            contract_uid = self.uid_start  # For contracts - using the same starting point
+            
             if self.access_db_path and os.path.exists(self.access_db_path):
                 conn_str = (
                     r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
@@ -422,11 +424,18 @@ class WrestleverseApp:
                 )
                 conn = pyodbc.connect(conn_str)
                 cursor = conn.cursor()
+                
+                # Get next worker UID
                 cursor.execute("SELECT MAX(UID) FROM tblWorker")
                 result = cursor.fetchone()
                 last_uid = result[0] if result[0] else 0
-                uid = last_uid + 1
-                logging.debug(f"Starting with UID: {uid}")
+                uid = max(last_uid + 1, self.uid_start)
+                
+                # Get next contract UID - using self.uid_start as minimum
+                cursor.execute("SELECT MAX(UID) FROM tblContract")
+                result = cursor.fetchone()
+                last_contract_uid = result[0] if result[0] else 0
+                contract_uid = max(last_contract_uid + 1, self.uid_start)
 
             # Collect all wrestler data first
             wrestler_data_list = []
@@ -462,7 +471,45 @@ class WrestleverseApp:
                 name = name[:30]
                 shortname = name.split()[0][:20] if name else ''
                 gender_value = 1 if gender.lower() == 'male' else 5
-                
+                weight = random.randint(150, 350)
+                min_weight = weight - 20  # Always 20 pounds less than current weight
+                max_weight = weight + random.randint(20, 50)
+
+                debut_date = datetime.datetime(
+                    random.randint(1980, 2023),  # Year between 1980 and 2023
+                    random.randint(1, 12),       # Month
+                    random.randint(1, 28)        # Day (avoiding potential month end issues)
+                )
+                debut_age = random.randint(16, 50) 
+                birth_year = debut_date.year - debut_age
+                birth_date = datetime.datetime(
+                    birth_year,
+                    random.randint(1, 12),  # Random birth month
+                    random.randint(1, 28)   # Random birth day (avoiding month end issues)
+                )
+                                # Convert boolean values for Access DB
+
+
+                logging.debug(f"Generated worker data for {wrestler_data['name']}")
+
+                # Get the style first
+                style = style_var.get() if hasattr(self, 'style_var') else "Interpret"
+
+                # Get the bio
+                bio_prompt = (
+                    f"Create a biography for a professional wrestler. The wrestler's name is {name}. "
+                    f"Their gender is {gender}. Description: {description}. "
+                    f"Their wrestling style is best described as {style}."
+                )
+                bio = self.get_response_from_gpt(bio_prompt)
+
+                if not bio:
+                    logging.error("Failed to generate biography")
+                    return
+
+                race = self.get_race_from_gpt(name, f"{description}\n\nBiography: {bio}")
+
+
                 # Initialize all required fields with proper defaults
                 worker_row = {
                     "UID": int(uid),
@@ -476,17 +523,17 @@ class WrestleverseApp:
                     "Sexuality": self.ensure_byte(1),
                     "CompetesAgainst": self.ensure_byte(2 if gender_value == 1 else 3),
                     "Outsiderel": self.ensure_byte(0),
-                    "Birthday": self.generate_birthday(),
-                    "DebutDate": datetime.datetime.now(),
+                    "Birthday": birth_date,
+                    "DebutDate": debut_date,
                     "DeathDate": "1666-01-01",  # Format as string for Access
                     "BodyType": self.ensure_byte(random.randint(0, 7)),
                     "WorkerHeight": self.ensure_byte(random.randint(20, 42)),
-                    "WorkerWeight": random.randint(150, 350),
-                    "WorkerMinWeight": random.randint(130, 300),
-                    "WorkerMaxWeight": random.randint(170, 400),
+                    "WorkerWeight": weight,
+                    "WorkerMinWeight": min_weight,
+                    "WorkerMaxWeight": max_weight,
                     "Picture": f"{name.replace(' ', '').lower()}.jpg"[:35],
                     "Nationality": int(1),
-                    "Race": self.ensure_byte(random.randint(1, 9)),
+                    "Race": self.ensure_byte(race),
                     "Based_In": self.ensure_byte(1),
                     "LeftBusiness": False,  # Will be converted to 0
                     "Dead": False,  # Will be converted to 0
@@ -535,22 +582,27 @@ class WrestleverseApp:
                     "CareerGoal": self.ensure_byte(0)
                 }
 
-                # Convert boolean values for Access DB
                 worker_row_converted = {
                     key: -1 if isinstance(value, bool) and value else 0 if isinstance(value, bool) else value
                     for key, value in worker_row.items()
                 }
-
                 workers_data.append(worker_row_converted)
-                logging.debug(f"Generated worker data for {wrestler_data['name']}")
 
-                # Generate bio
-                bio = self.generate_bio(
-                    wrestler_data['name'],
-                    wrestler_data['gender'],
-                    wrestler_data['description'],
-                    wrestler_data['skill_preset']
-                )
+                
+                # Now get race using both description and bio
+                
+                worker_data = {
+                    "UID": uid,
+                    "name": name,
+                    "shortname": name.split()[0],
+                    "picture": f"{name.replace(' ', '').lower()}.jpg",
+                    "gender": gender,
+                    "gender_id": 1 if gender.lower() == "male" else 2,
+                    "Race": race,
+                    "style": style,
+                    # ... rest of worker_data ...
+                }
+
                 bio_data.append([uid, bio])
                 logging.debug(f"Generated bio for {wrestler_data['name']}")
 
@@ -571,8 +623,10 @@ class WrestleverseApp:
 
                 # Generate contract if not freelancer
                 if wrestler_data['company'] != "Freelancer":
-                    contract = self.generate_contract(wrestler_data, uid, wrestler_data['company'])
+                    logging.debug(f"Creating contract with company: {wrestler_data['company']}")
+                    contract = self.generate_contract(wrestler_data, uid, wrestler_data['company'], contract_uid)
                     contract_data.append(contract)
+                    contract_uid += 1  # Increment for next contract
                     logging.debug(f"Generated contract for {wrestler_data['name']} with company {wrestler_data['company']}")
 
                 uid += 1
@@ -616,8 +670,20 @@ class WrestleverseApp:
                         """
 
                         # Convert dates to proper Access format
-                        birthday = self.generate_birthday()
-                        debut_date = datetime.datetime.now()
+
+                        debut_date = datetime.datetime(
+                            random.randint(1980, 2023),  # Year between 1980 and 2023
+                            random.randint(1, 12),       # Month
+                            random.randint(1, 28)        # Day (avoiding potential month end issues)
+                        )
+                        debut_age = random.randint(16, 50) 
+                        birth_year = debut_date.year - debut_age
+                        birth_date = datetime.datetime(
+                            birth_year,
+                            random.randint(1, 12),  # Random birth month
+                            random.randint(1, 28)   # Random birth day (avoiding month end issues)
+                        )
+                        
                         death_date = "1666-01-01"  # Format as string for Access
 
                         # Convert values to match Access data types
@@ -633,7 +699,7 @@ class WrestleverseApp:
                             int(worker_row_converted["Sexuality"]),              # Byte
                             int(worker_row_converted["CompetesAgainst"]),        # Byte
                             int(worker_row_converted["Outsiderel"]),             # Byte
-                            birthday,                                            # Date/Time
+                            birth_date,                                            # Date/Time
                             debut_date,                                          # Date/Time
                             death_date,                                          # Date/Time
                             int(worker_row_converted["BodyType"]),               # Byte
@@ -912,6 +978,12 @@ class WrestleverseApp:
             except Exception as e:
                 logging.error(f"Error saving Excel file: {e}", exc_info=True)
                 messagebox.showerror("Error", f"Could not save Excel file: {str(e)}")
+                uid = result[0] + 1 if result[0] else 1
+                
+                # Get next contract UID
+                cursor.execute("SELECT MAX(UID) FROM tblContract")
+                result = cursor.fetchone()
+                contract_uid = result[0] + 1 if result[0] else 1
 
         except Exception as e:
             error_message = f"Error generating wrestlers: {str(e)}"
@@ -1410,8 +1482,7 @@ class WrestleverseApp:
         }
 
     def get_companies(self):
-        """Get list of company names from Access DB or return empty list"""
-        companies = []
+        """Get list of companies from the database"""
         if self.access_db_path and os.path.exists(self.access_db_path):
             try:
                 conn_str = (
@@ -1421,41 +1492,51 @@ class WrestleverseApp:
                 )
                 conn = pyodbc.connect(conn_str)
                 cursor = conn.cursor()
-                cursor.execute("SELECT [Name] FROM tblFed ORDER BY [Name]")
-                companies = [row[0] for row in cursor.fetchall()]
+                
+                cursor.execute("SELECT UID, Name FROM tblFed")
+                companies = cursor.fetchall()
                 conn.close()
-                logging.debug(f"Retrieved {len(companies)} companies from database")
+                
+                # Log what we got from the database
+                logging.debug(f"Retrieved companies from database: {companies}")
+                
+                # Convert to list of tuples and ensure UIDs are integers
+                company_list = [(int(company[0]), company[1]) for company in companies]
+                logging.debug(f"Converted company list: {company_list}")
+                
+                return company_list
             except Exception as e:
-                logging.error(f"Error retrieving companies: {e}", exc_info=True)
-        return ["Random", "Freelancer"] + companies
+                logging.error(f"Error getting companies: {e}", exc_info=True)
+                return []
+        return []
 
-    def generate_contract(self, worker_data, worker_uid, company_choice):
+    def generate_contract(self, worker_data, worker_uid, company_choice, contract_uid):
         """Generate contract data for a worker"""
-        logging.debug(f"Generating contract for worker {worker_uid} with company choice {company_choice}")
+        logging.debug(f"Generating contract for worker {worker_uid} with company choice: '{company_choice}'")
         
-        # Get next contract UID
-        contract_uid = 1
-        if self.access_db_path and os.path.exists(self.access_db_path):
-            try:
-                conn = pyodbc.connect(self.conn_str)
-                cursor = conn.cursor()
-                cursor.execute("SELECT MAX(UID) FROM tblContract")
-                result = cursor.fetchone()
-                if result[0]:
-                    contract_uid = result[0] + 1
-                conn.close()
-            except Exception as e:
-                logging.error(f"Error getting next contract UID: {e}", exc_info=True)
         # Determine company UID
-        fed_uid = 0
-        if company_choice == "Random" and self.get_companies():
-            fed_uid = random.choice(self.get_companies())[0]
-        elif company_choice != "Freelancer":
-            companies = self.get_companies()
-            for comp in companies:
-                if comp[1] == company_choice:
-                    fed_uid = comp[0]
-                    break
+        companies = self.get_companies()
+        fed_uid = None
+        
+        if companies:
+            if company_choice == "Random":
+                company = random.choice(companies)
+                fed_uid = company[0]
+                logging.debug(f"Random company selected: {company[1]} (UID: {fed_uid})")
+            elif company_choice == "Freelancer":
+                logging.debug("Freelancer selected - no contract needed")
+                return None
+            else:
+                # Find exact matching company by name
+                for company in companies:
+                    if company[1] == company_choice:  # Exact match
+                        fed_uid = company[0]
+                        logging.debug(f"Found exact matching company: {company[1]} (UID: {fed_uid})")
+                        break
+                
+                if fed_uid is None:
+                    logging.error(f"No matching company found for: {company_choice}")
+                    return None
 
         # Determine face/heel alignment
         alignment_prompt = f"For a wrestler named {worker_data['name']}, should they be a face (good guy) or heel (bad guy)? Answer with only the word 'face' or 'heel'."
@@ -1556,7 +1637,105 @@ class WrestleverseApp:
 
         return contract_data
 
+    def get_race_from_gpt(self, name, description):
+        """Get race index from GPT based on name and description"""
+        prompt = (
+            f"Based on the name '{name}' and description '{description}', select the most appropriate "
+            "race from this list and respond with ONLY the corresponding number:\n"
+            "1: White\n2: Black\n3: Asian\n4: Hispanic\n5: American Indian\n"
+            "6: Middle Eastern\n7: South Asian\n8: Pacific\n9: Other\n\n"
+            "Respond with only the number."
+        )
+        
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            race_str = response.choices[0].message.content.strip()
+            logging.info(f"Race response from GPT: {race_str}")
+            # Try to convert to int and validate range
+            try:
+                race = int(race_str)
+                if 1 <= race <= 9:
+                    return race
+            except ValueError:
+                pass
+            
+            # If we get here, either conversion failed or number was out of range
+            logging.warning(f"Invalid race response from GPT: {race_str}, defaulting to 9")
+            return 9
+            
+        except Exception as e:
+            logging.error(f"Error getting race from GPT: {e}", exc_info=True)
+            return 9
+
+    def save_to_access_db(self, worker_data, bio_data, skills_data, contract_data):
+        """Save generated data to Access database"""
+        logging.debug("Attempting to save to Access database.")
+        try:
+            conn_str = (
+                r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
+                f'DBQ={self.access_db_path};'
+                'PWD=20YearsOfTEW;'
+            )
+            conn = pyodbc.connect(conn_str)
+            cursor = conn.cursor()
+
+            # Insert worker data
+            worker_sql = """
+                INSERT INTO tblWorker (
+                    UID, Name, ShortName, Picture, Gender, Race, Nationality, Height, Weight, 
+                    BirthDate, DebutDate, Face_Gimmick, Heel_Gimmick, Style
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """
+            worker_values = [
+                worker_data['UID'], worker_data['name'], worker_data['shortname'], 
+                worker_data['picture'], worker_data['gender_id'], worker_data['Race'], 
+                worker_data['nationality'], worker_data['height'], worker_data['weight'],
+                worker_data['Birthday'], worker_data['DebutDate'], 
+                worker_data['face_gimmick'], worker_data['heel_gimmick'], 
+                worker_data['style']
+            ]
+            cursor.execute(worker_sql, worker_values)
+            
+            # ... rest of database saving code ...
+
+            conn.commit()
+            logging.info(f"Created wrestler: {worker_data['name']} (UID: {worker_data['UID']}) - " 
+                        f"Race: {worker_data['Race']}, Nationality: {worker_data['nationality']}")
+            
+            # Print a summary of the created wrestler
+            print(f"\nCreated new wrestler:")
+            print(f"Name: {worker_data['name']}")
+            print(f"Race: {worker_data['Race']}")
+            print(f"Nationality: {worker_data['nationality']}")
+            print(f"Style: {worker_data['style']}")
+            if contract_data:
+                print(f"Company: {contract_data['Name']}")
+            else:
+                print("Status: Freelancer")
+            print("-" * 50)
+
+            return True
+        except Exception as e:
+            logging.error(f"Error saving to Access database: {e}", exc_info=True)
+            return False
+
+    def get_response_from_gpt(self, prompt):
+        """Helper method to get responses from GPT"""
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            logging.error(f"Error getting response from GPT: {e}", exc_info=True)
+            return ""
+
 if __name__ == "__main__":
     root = tk.Tk()
     app = WrestleverseApp(root)
     root.mainloop()
+
