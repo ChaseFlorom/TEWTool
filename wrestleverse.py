@@ -231,24 +231,7 @@ class WrestleverseApp:
                     logging.debug(f"Last SQL statement attempted: {sql_insert_company}")
                     messagebox.showerror("Error", f"Could not save to Access database: {str(e)}")
 
-            # Save to Excel
-            try:
-                logging.debug("Attempting to save data to Excel file.")
-                companies_df = pd.DataFrame(companies_data, columns=companies_columns)
-                bio_df = pd.DataFrame(bio_data, columns=["UID", "Bio"])
-                notes_df = pd.DataFrame(notes_data)  # Add this line
-                
-                excel_path = "wrestleverse_companies.xlsx"
-                with pd.ExcelWriter(excel_path, engine='xlsxwriter') as writer:
-                    companies_df.to_excel(writer, sheet_name="Companies", index=False)
-                    bio_df.to_excel(writer, sheet_name="Bios", index=False)
-                    notes_df.to_excel(writer, sheet_name="Notes", index=False)  # This will now include all columns
-                
-                logging.debug(f"Excel file saved successfully to {excel_path}")
-                messagebox.showinfo("Success", f"Companies saved to {excel_path}")
-            except Exception as e:
-                logging.error(f"Error saving Excel file: {e}", exc_info=True)
-                messagebox.showerror("Error", f"Could not save Excel file: {str(e)}")
+
 
             # Inside the try block, just before saving to Excel:
             for note in notes_data:
@@ -1061,23 +1044,7 @@ class WrestleverseApp:
                     note['physical_description'] = ""
 
             # Save to Excel
-            try:
-                logging.debug("Attempting to save data to Excel file.")
-                #companies_df = pd.DataFrame(companies_data, columns=companies_columns)
-                bio_df = pd.DataFrame(bio_data, columns=["UID", "Bio"])
-                notes_df = pd.DataFrame(notes_data)  # Add this line
-                
-                excel_path = "wrestleverse_companies.xlsx"
-                with pd.ExcelWriter(excel_path, engine='xlsxwriter') as writer:
-                    #companies_df.to_excel(writer, sheet_name="Companies", index=False)
-                    bio_df.to_excel(writer, sheet_name="Bios", index=False)
-                    notes_df.to_excel(writer, sheet_name="Notes", index=False)  # This will now include all columns
-                
-                logging.debug(f"Excel file saved successfully to {excel_path}")
-                messagebox.showinfo("Success", f"Companies saved to {excel_path}")
-            except Exception as e:
-                logging.error(f"Error saving Excel file: {e}", exc_info=True)
-                messagebox.showerror("Error", f"Could not save Excel file: {str(e)}")
+            
 
         except Exception as e:
             logging.error(f"Unhandled error in generate_wrestlers: {e}", exc_info=True)
@@ -1856,4 +1823,3 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = WrestleverseApp(root)
     root.mainloop()
-
