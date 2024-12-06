@@ -175,11 +175,15 @@ class WrestleverseApp:
                 bio = self.generate_company_bio(name, description, size)
                 bio_data.append([uid, bio])
 
-                # Store description in notes
+                # Store description in notes with image_generated flag
                 notes_data.append({
                     "Name": name,
                     "Description": description,
-                    "Size": size
+                    "Size": size,
+                    "Logo": f"{name.replace(' ', '').lower()}.jpg"[:35],  # Match the Logo field
+                    "Backdrop": f"{name.replace(' ', '').lower()}BD.jpg"[:35],  # Match the Backdrop field
+                    "Banner": f"{name.replace(' ', '').lower()}Banner.jpg"[:30],  # Match the Banner field
+                    "image_generated": False
                 })
 
                 uid += 1
@@ -231,13 +235,13 @@ class WrestleverseApp:
                 logging.debug("Attempting to save data to Excel file.")
                 companies_df = pd.DataFrame(companies_data, columns=companies_columns)
                 bio_df = pd.DataFrame(bio_data, columns=["UID", "Bio"])
-                notes_df = pd.DataFrame(notes_data)
+                notes_df = pd.DataFrame(notes_data)  # Add this line
                 
                 excel_path = "wrestleverse_companies.xlsx"
                 with pd.ExcelWriter(excel_path, engine='xlsxwriter') as writer:
                     companies_df.to_excel(writer, sheet_name="Companies", index=False)
                     bio_df.to_excel(writer, sheet_name="Bios", index=False)
-                    notes_df.to_excel(writer, sheet_name="Notes", index=False)
+                    notes_df.to_excel(writer, sheet_name="Notes", index=False)  # This will now include all columns
                 
                 logging.debug(f"Excel file saved successfully to {excel_path}")
                 messagebox.showinfo("Success", f"Companies saved to {excel_path}")
@@ -411,6 +415,7 @@ class WrestleverseApp:
             bio_data = []
             skills_data = []
             contract_data = []
+            notes_data = []  # Add this line
             
             # Get starting UIDs from settings
             uid = self.uid_start  # For workers
@@ -629,6 +634,18 @@ class WrestleverseApp:
                     contract_uid += 1  # Increment for next contract
                     logging.debug(f"Generated contract for {wrestler_data['name']} with company {wrestler_data['company']}")
 
+                # Add to notes data with picture path and generation flag
+                notes_data.append({
+                    "Name": name,
+                    "Description": description,
+                    "Gender": gender,
+                    "Company": wrestler_data.get('company', 'Random'),
+                    "Exclusive": wrestler_data.get('exclusive', 'Random'),
+                    "Skill_Preset": wrestler_data.get('skill_preset', 'Default'),
+                    "Picture": f"{name.replace(' ', '').lower()}.jpg"[:35],  # Match the Picture field
+                    "image_generated": False
+                })
+
                 uid += 1
 
             # Save to Access DB if path exists
@@ -665,7 +682,7 @@ class WrestleverseApp:
                                 [PlasterCaster_FaceBasis], [PlasterCaster_Heel], [PlasterCaster_HeelBasis],
                                 [CareerGoal]
                             ) VALUES (
-                                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                             )
                         """
 
@@ -965,6 +982,7 @@ class WrestleverseApp:
                 bio_df = pd.DataFrame(bio_data, columns=["UID", "Bio"])
                 skills_df = pd.DataFrame(skills_data)
                 contracts_df = pd.DataFrame(contract_data)
+                notes_df = pd.DataFrame(notes_data)  # Add this line
                 
                 excel_path = "wrestleverse_workers.xlsx"
                 with pd.ExcelWriter(excel_path) as writer:
@@ -972,6 +990,7 @@ class WrestleverseApp:
                     bio_df.to_excel(writer, sheet_name="Bios", index=False)
                     skills_df.to_excel(writer, sheet_name="Skills", index=False)
                     contracts_df.to_excel(writer, sheet_name="Contracts", index=False)
+                    notes_df.to_excel(writer, sheet_name="Notes", index=False)  # Add this line
                 
                 logging.debug(f"Successfully saved data to Excel file at {excel_path}")
                 messagebox.showinfo("Success", f"Wrestlers saved to {excel_path}")
