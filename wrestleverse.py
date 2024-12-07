@@ -1941,8 +1941,158 @@ class WrestleverseApp:
             self.root.update_idletasks()
 
     def generate_company_images(self):
-        # Placeholder for company image generation
-        messagebox.showinfo("Info", "Company image generation will be implemented here")
+        if not self.api_key:
+            messagebox.showerror("Error", "Please set your API key in settings first.")
+            return
+            
+        if not self.pictures_path:
+            messagebox.showerror("Error", "Please set your pictures path in settings first.")
+            return
+            
+        try:
+            # Read the Excel file
+            excel_path = "wrestleverse_companies.xlsx"
+            if not os.path.exists(excel_path):
+                messagebox.showerror("Error", "Companies Excel file not found.")
+                return
+                
+            # Create necessary directories if they don't exist
+            logos_dir = os.path.join(self.pictures_path, "Logos")
+            banners_dir = os.path.join(self.pictures_path, "Banners")
+            backdrops_dir = os.path.join(self.pictures_path, "Logo_Backdrops")
+            
+            for directory in [logos_dir, banners_dir, backdrops_dir]:
+                os.makedirs(directory, exist_ok=True)
+            
+            # Read the Notes sheet
+            df = pd.read_excel(excel_path, sheet_name="Notes")
+            
+            # Filter for rows where images haven't been generated
+            pending_images = df[df['image_generated'] == False]
+            
+            if pending_images.empty:
+                messagebox.showinfo("Info", "No pending images to generate.")
+                return
+                
+            total_companies = len(pending_images)
+            generated_count = 0
+            
+            # Update status
+            self.status_label.config(text=f"Generating images: 0/{total_companies}")
+            self.root.update_idletasks()
+            
+            # Process each pending company
+            for index, row in pending_images.iterrows():
+                try:
+                    company_name = row['Name']
+                    description = row['Description']
+                    
+                    # Clean up file names by removing quotes and invalid characters
+                    logo_filename = row['Logo'].replace('"', '').replace('\\', '')
+                    banner_filename = row['Banner'].replace('"', '').replace('\\', '')
+                    backdrop_filename = row['Backdrop'].replace('"', '').replace('\\', '')
+                    
+                    # Generate Logo
+                    logo_prompt = (
+                        f"Professional wrestling company logo for \"{company_name}\". "
+                        f"Company description: {description}. "
+                        "The logo should be professional, memorable, and include the company name. "
+                        "Use a transparent or solid background. Make it bold and striking."
+                    )
+                    
+                    response = self.client.images.generate(
+                        model="dall-e-3",
+                        prompt=logo_prompt,
+                        size="1024x1024",
+                        quality="standard",
+                        n=1,
+                    )
+                    
+                    # Save Logo
+                    image_url = response.data[0].url
+                    import requests
+                    response = requests.get(image_url)
+                    response.raise_for_status()
+                    with open(os.path.join(logos_dir, logo_filename), 'wb') as f:
+                        f.write(response.content)
+                    
+                    time.sleep(1)  # Delay to avoid rate limiting
+                    
+                    # Generate Banner
+                    banner_prompt = (
+                        f"Professional wrestling company banner for \"{company_name}\". "
+                        f"Company description: {description}. "
+                        "Create a wide promotional banner (1:5 aspect ratio) with dynamic wrestling imagery. "
+                        "Include the company name prominently. Make it exciting and eye-catching."
+                    )
+                    
+                    response = self.client.images.generate(
+                        model="dall-e-3",
+                        prompt=banner_prompt,
+                        size="1024x1024",
+                        quality="standard",
+                        n=1,
+                    )
+                    
+                    # Save Banner
+                    image_url = response.data[0].url
+                    response = requests.get(image_url)
+                    response.raise_for_status()
+                    with open(os.path.join(banners_dir, banner_filename), 'wb') as f:
+                        f.write(response.content)
+                    
+                    time.sleep(1)  # Delay to avoid rate limiting
+                    
+                    # Generate Backdrop
+                    backdrop_prompt = (
+                        f"Professional wrestling backdrop for \"{company_name}\". "
+                        f"Company description: {description}. "
+                        "Create a dramatic arena backdrop with the company's branding. "
+                        "Should be suitable for a wrestling event, with atmospheric lighting and professional design."
+                    )
+                    
+                    response = self.client.images.generate(
+                        model="dall-e-3",
+                        prompt=backdrop_prompt,
+                        size="1024x1024",
+                        quality="standard",
+                        n=1,
+                    )
+                    
+                    # Save Backdrop
+                    image_url = response.data[0].url
+                    response = requests.get(image_url)
+                    response.raise_for_status()
+                    with open(os.path.join(backdrops_dir, backdrop_filename), 'wb') as f:
+                        f.write(response.content)
+                    
+                    # Update the Excel file to mark this company's images as generated
+                    df.at[index, 'image_generated'] = True
+                    generated_count += 1
+                    
+                    # Update status
+                    self.status_label.config(text=f"Generating images: {generated_count}/{total_companies}")
+                    self.root.update_idletasks()
+                    
+                    time.sleep(1)  # Delay to avoid rate limiting
+                    
+                except Exception as e:
+                    logging.error(f"Error generating images for {company_name}: {str(e)}")
+                    messagebox.showerror("Error", f"Failed to generate images for {company_name}: {str(e)}")
+                    continue
+            
+            # Save the updated Excel file
+            with pd.ExcelWriter(excel_path, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+                df.to_excel(writer, sheet_name="Notes", index=False)
+            
+            messagebox.showinfo("Success", f"Generated images for {generated_count} companies successfully!")
+            
+        except Exception as e:
+            logging.error(f"Error in generate_company_images: {str(e)}")
+            messagebox.showerror("Error", f"An error occurred: {str(e)}")
+        finally:
+            self.status_label.config(text="")
+            self.root.update_idletasks()
 
 if __name__ == "__main__":
     root = tk.Tk()
