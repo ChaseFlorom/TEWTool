@@ -129,6 +129,16 @@ class WrestleverseApp:
                     name = self.generate_company_name(description=description, size=size)
                 if not description:
                     description = self.generate_company_description(name=name, size=size)
+                base_name = name.replace(' ', '').replace('.', '').lower()
+
+                # For logo: truncate to 26 chars + .jpg = 30 chars max
+                logo_name = f"{base_name[:26]}.jpg"
+
+                # For backdrop: truncate to 24 chars + BD.jpg = 30 chars max
+                backdrop_name = f"{base_name[:24]}BD.jpg"
+
+                # For banner: truncate to 24 chars + BN.jpg = 30 chars max
+                banner_name = f"{base_name[:24]}BN.jpg"
 
                 # Generate company row data
                 company_row = [
@@ -140,9 +150,9 @@ class WrestleverseApp:
                     "1666-01-01",  # CompanyClosing
                     -1,  # Trading (True = -1)
                     0,  # Mediagroup
-                    f"{name.replace(' ', '').lower()}.jpg"[:35],  # Logo
-                    f"{name.replace(' ', '').lower()}BD.jpg"[:35],  # Backdrop
-                    f"{name.replace(' ', '').lower()}Banner.jpg"[:30],  # Banner
+                    logo_name,  # Logo
+                    backdrop_name,  # Backdrop
+                    banner_name,  # Banner
                     1,  # Based_In
                     random.randint(1, 100),  # Prestige
                     0,  # Influence
@@ -499,7 +509,9 @@ class WrestleverseApp:
                 
                 if not name:
                     name = self.generate_name(description=description, gender=gender)
-                name = name[:30]
+                name = name.replace('.', '').strip()  # Remove periods and any extra whitespace
+                name = name[:30]  # Then truncate to 30 chars
+
                 shortname = name.split()[0][:20] if name else ''
                 gender_value = 1 if gender.lower() == 'male' else 5
                 weight = random.randint(150, 350)
@@ -539,7 +551,8 @@ class WrestleverseApp:
                     return
 
                 race = self.get_race_from_gpt(name, f"{description}\n\nBiography: {bio}")
-
+                picture_name = f"{name.replace(' ', '').lower()}"
+                picture_name = f"{picture_name[:26]}.jpg" 
 
                 # Initialize all required fields with proper defaults
                 worker_row = {
@@ -562,7 +575,7 @@ class WrestleverseApp:
                     "WorkerWeight": weight,
                     "WorkerMinWeight": min_weight,
                     "WorkerMaxWeight": max_weight,
-                    "Picture": f"{name.replace(' ', '').lower()}.jpg"[:35],
+                    "Picture": picture_name,
                     "Nationality": int(1),
                     "Race": self.ensure_byte(race),
                     "Based_In": self.ensure_byte(1),
