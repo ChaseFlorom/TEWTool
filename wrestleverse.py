@@ -6,6 +6,7 @@ import json
 import pandas as pd
 import random
 import os
+import time
 import pyodbc
 from openai import OpenAI
 import datetime
@@ -38,7 +39,6 @@ class WrestleverseApp:
         self.wrestlers = []
         self.companies = []
         self.setup_main_menu()
-
     def add_company_form(self):
         company_frame = ttk.Frame(self.companies_frame, relief="ridge", borderwidth=2)
         company_frame.pack(fill="x", pady=5)
@@ -1834,12 +1834,111 @@ class WrestleverseApp:
         generate_company_images_btn = ttk.Button(self.root, text="Generate Company Images", command=self.generate_company_images)
         generate_company_images_btn.pack(pady=10)
         
+        self.status_label = ttk.Label(self.root, text="")
+        self.status_label.pack(pady=10)
+        
         back_btn = ttk.Button(self.root, text="Back", command=self.setup_main_menu)
         back_btn.pack(side="bottom", pady=10)
 
     def generate_wrestler_images(self):
-        # Placeholder for wrestler image generation
-        messagebox.showinfo("Info", "Wrestler image generation will be implemented here")
+        if not self.api_key:
+            messagebox.showerror("Error", "Please set your API key in settings first.")
+            return
+        
+        if not self.pictures_path:
+            messagebox.showerror("Error", "Please set your pictures path in settings first.")
+            return
+        
+        try:
+            # Read the Excel file
+            excel_path = "wrestleverse_workers.xlsx"
+            if not os.path.exists(excel_path):
+                messagebox.showerror("Error", "Wrestlers Excel file not found.")
+                return
+            
+            # Create People directory if it doesn't exist
+            people_dir = os.path.join(self.pictures_path, "People")
+            os.makedirs(people_dir, exist_ok=True)
+            
+            # Read the Notes sheet
+            df = pd.read_excel(excel_path, sheet_name="Notes")
+            
+            # Filter for rows where images haven't been generated
+            pending_images = df[df['image_generated'] == False]
+            
+            if pending_images.empty:
+                messagebox.showinfo("Info", "No pending images to generate.")
+                return
+            
+            total_images = len(pending_images)
+            generated_count = 0
+            
+            # Update status
+            self.status_label.config(text=f"Generating images: 0/{total_images}")
+            self.root.update_idletasks()
+            
+            # Process each pending image
+            for index, row in pending_images.iterrows():
+                try:
+                    # Construct the prompt
+                    prompt = (
+                        f"Professional wrestling promotional photo. {row['physical_description']} "
+                        "The image should be a high-quality, professional headshot style photo "
+                        "with good lighting and a neutral background. The subject should be "
+                        "looking directly at the camera with a confident expression."
+                    )
+                    
+                    # Generate the image
+                    response = self.client.images.generate(
+                        model="dall-e-3",
+                        prompt=prompt,
+                        size="1024x1024",
+                        quality="standard",
+                        n=1,
+                    )
+                    
+                    # Get the image URL
+                    image_url = response.data[0].url
+                    
+                    # Download and save the image
+                    import requests
+                    image_name = row['Picture']
+                    image_path = os.path.join(people_dir, image_name)
+                    
+                    response = requests.get(image_url)
+                    response.raise_for_status()
+                    
+                    with open(image_path, 'wb') as f:
+                        f.write(response.content)
+                    
+                    # Update the Excel file to mark this image as generated
+                    df.at[index, 'image_generated'] = True
+                    generated_count += 1
+                    
+                    # Update status
+                    self.status_label.config(text=f"Generating images: {generated_count}/{total_images}")
+                    self.root.update_idletasks()
+                    
+                    # Add a small delay to avoid rate limiting
+                    time.sleep(1)
+                    
+                except Exception as e:
+                    logging.error(f"Error generating image for {row['Name']}: {str(e)}")
+                    messagebox.showerror("Error", f"Failed to generate image for {row['Name']}: {str(e)}")
+                    continue
+            
+            # Save the updated Excel file
+            with pd.ExcelWriter(excel_path, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+                df.to_excel(writer, sheet_name="Notes", index=False)
+            
+            messagebox.showinfo("Success", f"Generated {generated_count} images successfully!")
+            
+        except Exception as e:
+            logging.error(f"Error in generate_wrestler_images: {str(e)}")
+            messagebox.showerror("Error", f"An error occurred: {str(e)}")
+        finally:
+            self.status_label.config("")
+            self.root.update_idletasks()
 
     def generate_company_images(self):
         # Placeholder for company image generation
