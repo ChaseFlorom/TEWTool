@@ -11,6 +11,8 @@ import pyodbc
 from openai import OpenAI
 import datetime
 import logging
+from PIL import Image
+import io
 
 logging.basicConfig(
     filename='log.txt',
@@ -657,6 +659,16 @@ class WrestleverseApp:
                     contract_uid += 1  # Increment for next contract
                     logging.debug(f"Generated contract for {wrestler_data['name']} with company {wrestler_data['company']}")
 
+                    physical_prompt = (
+                        f"Based on this wrestler's details:\n"
+                        f"Name: {name}\n"
+                        f"Description: {description}\n"
+                        f"Gender: {gender}\n"
+                        f"Race: {self.get_race_name(race)}\n"  # Add race to prompt
+                        f"Please provide a single sentence describing their physical appearance. "
+                        f"Focus on height, build, and distinctive features."
+                    )
+                    physical_description = self.get_response_from_gpt(physical_prompt)
                 # Add to notes data with picture path and generation flag
                 notes_data.append({
                     "Name": name,
@@ -665,8 +677,11 @@ class WrestleverseApp:
                     "Company": wrestler_data.get('company', 'Random'),
                     "Exclusive": wrestler_data.get('exclusive', 'Random'),
                     "Skill_Preset": wrestler_data.get('skill_preset', 'Default'),
-                    "Picture": f"{name.replace(' ', '').lower()}.jpg"[:35],  # Match the Picture field
-                    "image_generated": False
+                    "Picture": f"{name.replace(' ', '').lower()}.jpg"[:35],
+
+                    "physical_description":  physical_description,  # Include race in physical description
+                    "image_generated": False,
+                    "Race": race  # Also include race for reference
                 })
 
                 uid += 1
@@ -1001,13 +1016,42 @@ class WrestleverseApp:
             # Save to Excel as backup
             try:
                 logging.debug("Attempting to save data to Excel file.")
-                workers_df = pd.DataFrame(workers_data)
-                bio_df = pd.DataFrame(bio_data, columns=["UID", "Bio"])
-                skills_df = pd.DataFrame(skills_data)
-                contracts_df = pd.DataFrame(contract_data)
-                notes_df = pd.DataFrame(notes_data)
-                
                 excel_path = "wrestleverse_workers.xlsx"
+                
+                # Check if file exists and read existing data
+                if os.path.exists(excel_path):
+                    existing_workers = pd.read_excel(excel_path, sheet_name="Workers")
+                    existing_bios = pd.read_excel(excel_path, sheet_name="Bios")
+                    existing_skills = pd.read_excel(excel_path, sheet_name="Skills")
+                    existing_contracts = pd.read_excel(excel_path, sheet_name="Contracts")
+                    existing_notes = pd.read_excel(excel_path, sheet_name="Notes")
+                    
+                    # Convert new data to DataFrames
+                    new_workers = pd.DataFrame(workers_data)
+                    new_bios = pd.DataFrame(bio_data, columns=["UID", "Bio"])
+                    new_skills = pd.DataFrame(skills_data)
+                    new_contracts = pd.DataFrame(contract_data)
+                    new_notes = pd.DataFrame(notes_data)
+                    
+                    # Concatenate existing and new data
+                    workers_df = pd.concat([existing_workers, new_workers], ignore_index=True)
+                    bio_df = pd.concat([existing_bios, new_bios], ignore_index=True)
+                    skills_df = pd.concat([existing_skills, new_skills], ignore_index=True)
+                    contracts_df = pd.concat([existing_contracts, new_contracts], ignore_index=True)
+                    notes_df = pd.concat([existing_notes, new_notes], ignore_index=True)
+                else:
+                    # If file doesn't exist, create new DataFrames
+                    workers_df = pd.DataFrame(workers_data)
+                    bio_df = pd.DataFrame(bio_data, columns=["UID", "Bio"])
+                    skills_df = pd.DataFrame(skills_data)
+                    contracts_df = pd.DataFrame(contract_data)
+                    notes_df = pd.DataFrame(notes_data)
+                
+                # Explicitly ensure physical_description is included in notes_df
+                if 'physical_description' not in notes_df.columns:
+                    notes_df['physical_description'] = ''
+                
+                # Save to Excel
                 with pd.ExcelWriter(excel_path) as writer:
                     workers_df.to_excel(writer, sheet_name="Workers", index=False)
                     bio_df.to_excel(writer, sheet_name="Bios", index=False)
@@ -1036,12 +1080,14 @@ class WrestleverseApp:
                         f"Name: {note['Name']}\n"
                         f"Description: {note['Description']}\n"
                         f"Gender: {note['Gender']}\n"
+                        f"Race: {self.get_race_name(note.get('Race', 0))}\n"  # Add race to prompt
                         f"Please provide a single sentence describing their physical appearance. "
                         f"Focus on height, build, and distinctive features."
                     )
                     physical_description = self.get_response_from_gpt(physical_prompt)
-                    note['physical_description'] = physical_description
-                    logging.debug(f"Generated physical description for {note['Name']}: {physical_description}")
+                    # Combine race with the generated description
+                    note['physical_description'] = f"Race: {self.get_race_name(note.get('Race', 0))}. {physical_description}"
+                    logging.debug(f"Generated physical description for {note['Name']}: {note['physical_description']}")
                 except Exception as e:
                     logging.error(f"Error generating physical description: {e}")
                     note['physical_description'] = ""
@@ -1850,20 +1896,15 @@ class WrestleverseApp:
             return
         
         try:
-            # Read the Excel file
             excel_path = "wrestleverse_workers.xlsx"
             if not os.path.exists(excel_path):
                 messagebox.showerror("Error", "Wrestlers Excel file not found.")
                 return
             
-            # Create People directory if it doesn't exist
             people_dir = os.path.join(self.pictures_path, "People")
             os.makedirs(people_dir, exist_ok=True)
             
-            # Read the Notes sheet
             df = pd.read_excel(excel_path, sheet_name="Notes")
-            
-            # Filter for rows where images haven't been generated
             pending_images = df[df['image_generated'] == False]
             
             if pending_images.empty:
@@ -1873,14 +1914,11 @@ class WrestleverseApp:
             total_images = len(pending_images)
             generated_count = 0
             
-            # Update status
             self.status_label.config(text=f"Generating images: 0/{total_images}")
             self.root.update_idletasks()
             
-            # Process each pending image
             for index, row in pending_images.iterrows():
                 try:
-                    # Construct the prompt
                     prompt = (
                         f"Professional wrestling promotional photo. {row['physical_description']} "
                         "The image should be a high-quality, professional headshot style photo "
@@ -1888,7 +1926,6 @@ class WrestleverseApp:
                         "looking directly at the camera with a confident expression."
                     )
                     
-                    # Generate the image
                     response = self.client.images.generate(
                         model="dall-e-3",
                         prompt=prompt,
@@ -1897,19 +1934,20 @@ class WrestleverseApp:
                         n=1,
                     )
                     
-                    # Get the image URL
                     image_url = response.data[0].url
-                    
-                    # Download and save the image
                     import requests
-                    image_name = row['Picture']
-                    image_path = os.path.join(people_dir, image_name)
-                    
                     response = requests.get(image_url)
                     response.raise_for_status()
                     
+                    # Resize image to 150x150
+                    resized_image = self.resize_image(response.content, (150, 150))
+                    
+                    # Ensure filename is trimmed and has .jpg extension
+                    image_name = row['Picture'][:26] + '.jpg'  # 26 + 4 (.jpg) = 30 chars
+                    image_path = os.path.join(people_dir, image_name)
+                    
                     with open(image_path, 'wb') as f:
-                        f.write(response.content)
+                        f.write(resized_image)
                     
                     # Update the Excel file to mark this image as generated
                     df.at[index, 'image_generated'] = True
@@ -1919,7 +1957,6 @@ class WrestleverseApp:
                     self.status_label.config(text=f"Generating images: {generated_count}/{total_images}")
                     self.root.update_idletasks()
                     
-                    # Add a small delay to avoid rate limiting
                     time.sleep(1)
                     
                 except Exception as e:
@@ -1927,7 +1964,6 @@ class WrestleverseApp:
                     messagebox.showerror("Error", f"Failed to generate image for {row['Name']}: {str(e)}")
                     continue
             
-            # Save the updated Excel file
             with pd.ExcelWriter(excel_path, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
                 df.to_excel(writer, sheet_name="Notes", index=False)
             
@@ -1950,13 +1986,11 @@ class WrestleverseApp:
             return
             
         try:
-            # Read the Excel file
             excel_path = "wrestleverse_companies.xlsx"
             if not os.path.exists(excel_path):
                 messagebox.showerror("Error", "Companies Excel file not found.")
                 return
                 
-            # Create necessary directories if they don't exist
             logos_dir = os.path.join(self.pictures_path, "Logos")
             banners_dir = os.path.join(self.pictures_path, "Banners")
             backdrops_dir = os.path.join(self.pictures_path, "Logo_Backdrops")
@@ -1964,10 +1998,7 @@ class WrestleverseApp:
             for directory in [logos_dir, banners_dir, backdrops_dir]:
                 os.makedirs(directory, exist_ok=True)
             
-            # Read the Notes sheet
             df = pd.read_excel(excel_path, sheet_name="Notes")
-            
-            # Filter for rows where images haven't been generated
             pending_images = df[df['image_generated'] == False]
             
             if pending_images.empty:
@@ -1977,20 +2008,18 @@ class WrestleverseApp:
             total_companies = len(pending_images)
             generated_count = 0
             
-            # Update status
             self.status_label.config(text=f"Generating images: 0/{total_companies}")
             self.root.update_idletasks()
             
-            # Process each pending company
             for index, row in pending_images.iterrows():
                 try:
                     company_name = row['Name']
                     description = row['Description']
                     
-                    # Clean up file names by removing quotes and invalid characters
-                    logo_filename = row['Logo'].replace('"', '').replace('\\', '')
-                    banner_filename = row['Banner'].replace('"', '').replace('\\', '')
-                    backdrop_filename = row['Backdrop'].replace('"', '').replace('\\', '')
+                    # Clean up and trim filenames
+                    logo_filename = (row['Logo'].replace('"', '').replace('\\', '')[:26] + '.jpg')
+                    banner_filename = (row['Banner'].replace('"', '').replace('\\', '')[:26] + '.jpg')
+                    backdrop_filename = (row['Backdrop'].replace('"', '').replace('\\', '')[:26] + '.jpg')
                     
                     # Generate Logo
                     logo_prompt = (
@@ -2008,15 +2037,16 @@ class WrestleverseApp:
                         n=1,
                     )
                     
-                    # Save Logo
                     image_url = response.data[0].url
-                    import requests
                     response = requests.get(image_url)
                     response.raise_for_status()
-                    with open(os.path.join(logos_dir, logo_filename), 'wb') as f:
-                        f.write(response.content)
                     
-                    time.sleep(1)  # Delay to avoid rate limiting
+                    # Resize logo to 150x150
+                    resized_logo = self.resize_image(response.content, (150, 150))
+                    with open(os.path.join(logos_dir, logo_filename), 'wb') as f:
+                        f.write(resized_logo)
+                    
+                    time.sleep(1)
                     
                     # Generate Banner
                     banner_prompt = (
@@ -2038,10 +2068,13 @@ class WrestleverseApp:
                     image_url = response.data[0].url
                     response = requests.get(image_url)
                     response.raise_for_status()
-                    with open(os.path.join(banners_dir, banner_filename), 'wb') as f:
-                        f.write(response.content)
                     
-                    time.sleep(1)  # Delay to avoid rate limiting
+                    # Resize banner to 500x40
+                    resized_banner = self.resize_image(response.content, (500, 40))
+                    with open(os.path.join(banners_dir, banner_filename), 'wb') as f:
+                        f.write(resized_banner)
+                    
+                    time.sleep(1)
                     
                     # Generate Backdrop
                     backdrop_prompt = (
@@ -2063,25 +2096,25 @@ class WrestleverseApp:
                     image_url = response.data[0].url
                     response = requests.get(image_url)
                     response.raise_for_status()
-                    with open(os.path.join(backdrops_dir, backdrop_filename), 'wb') as f:
-                        f.write(response.content)
                     
-                    # Update the Excel file to mark this company's images as generated
+                    # Resize backdrop to 150x150
+                    resized_backdrop = self.resize_image(response.content, (150, 150))
+                    with open(os.path.join(backdrops_dir, backdrop_filename), 'wb') as f:
+                        f.write(resized_backdrop)
+                    
                     df.at[index, 'image_generated'] = True
                     generated_count += 1
                     
-                    # Update status
                     self.status_label.config(text=f"Generating images: {generated_count}/{total_companies}")
                     self.root.update_idletasks()
                     
-                    time.sleep(1)  # Delay to avoid rate limiting
+                    time.sleep(1)
                     
                 except Exception as e:
                     logging.error(f"Error generating images for {company_name}: {str(e)}")
                     messagebox.showerror("Error", f"Failed to generate images for {company_name}: {str(e)}")
                     continue
             
-            # Save the updated Excel file
             with pd.ExcelWriter(excel_path, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
                 df.to_excel(writer, sheet_name="Notes", index=False)
             
@@ -2093,6 +2126,19 @@ class WrestleverseApp:
         finally:
             self.status_label.config(text="")
             self.root.update_idletasks()
+
+    def get_race_name(self, race_number):
+        race_map = {
+            1: "Caucasian",
+            2: "African American",
+            3: "Asian",
+            4: "Hispanic",
+            5: "Indian",
+            6: "Middle Eastern",
+            7: "Pacific Islander",
+            8: "Mixed Race"
+        }
+        return race_map.get(race_number, "Unknown")
 
 if __name__ == "__main__":
     root = tk.Tk()
