@@ -1218,7 +1218,7 @@ class WrestleverseApp:
         return response.choices[0].message.content.strip()
 
     def generate_gimmick(self, name, description, gender, alignment):
-        prompt = f"Generate a wrestling gimmick for a {alignment} wrestler."
+        prompt = f"Generate a wrestling gimmick for a {alignment} wrestler. Return only a couple of words for the gimmick and not other text. For example, if the wrestler was big and daunting, their gimmick might be Mountain. A sassy wrestler could be Valley Girl. These are just examples."
         if name:
             prompt += f" The wrestler's name is {name}."
         if description:
@@ -1944,7 +1944,7 @@ class WrestleverseApp:
                     resized_image = self.resize_image(response.content, (150, 150))
                     
                     # Ensure filename is trimmed and has .jpg extension
-                    image_name = row['Picture'][:26] + '.jpg'  # 26 + 4 (.jpg) = 30 chars
+                    image_name = row['Picture'][:26]  # 26 + 4 (.jpg) = 30 chars
                     image_path = os.path.join(people_dir, image_name)
                     
                     with open(image_path, 'wb') as f:
@@ -2018,9 +2018,9 @@ class WrestleverseApp:
                     description = row['Description']
                     
                     # Clean up and trim filenames
-                    logo_filename = (row['Logo'].replace('"', '').replace('\\', '')[:26] + '.jpg')
+                    logo_filename = (row['Logo'].replace('"', '').replace('\\', '')[:26])
                     banner_filename = (row['Banner'].replace('"', '').replace('\\', '')[:26] + '.jpg')
-                    backdrop_filename = (row['Backdrop'].replace('"', '').replace('\\', '')[:26] + '.jpg')
+                    backdrop_filename = (row['Backdrop'].replace('"', '').replace('\\', '')[:26])
                     
                     # Generate Logo
                     logo_prompt = (
