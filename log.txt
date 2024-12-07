@@ -1853,3 +1853,118 @@ IndexError: list index out of range
 2024-12-06 19:56:01,093 - ERROR - Error generating image for Mustachio: 'WrestleverseApp' object has no attribute 'resize_image'
 2024-12-06 19:56:19,565 - DEBUG - close.started
 2024-12-06 19:56:19,565 - DEBUG - close.complete
+2024-12-06 19:57:58,579 - DEBUG - Request options: {'method': 'post', 'url': '/images/generations', 'files': None, 'json_data': {'prompt': 'Professional wrestling company logo for "Crucible". Company description: a wrestling company with forge visuals. The logo should be professional, memorable, and include the company name. Use a transparent or solid background. Make it bold and striking.', 'model': 'dall-e-3', 'n': 1, 'quality': 'standard', 'size': '1024x1024'}}
+2024-12-06 19:57:58,651 - DEBUG - Sending HTTP Request: POST https://api.openai.com/v1/images/generations
+2024-12-06 19:57:58,651 - DEBUG - connect_tcp.started host='api.openai.com' port=443 local_address=None timeout=5.0 socket_options=None
+2024-12-06 19:57:58,683 - DEBUG - connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000001D966EC0080>
+2024-12-06 19:57:58,683 - DEBUG - start_tls.started ssl_context=<ssl.SSLContext object at 0x000001D9674A28D0> server_hostname='api.openai.com' timeout=5.0
+2024-12-06 19:57:58,706 - DEBUG - start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000001D967319220>
+2024-12-06 19:57:58,707 - DEBUG - send_request_headers.started request=<Request [b'POST']>
+2024-12-06 19:57:58,707 - DEBUG - send_request_headers.complete
+2024-12-06 19:57:58,707 - DEBUG - send_request_body.started request=<Request [b'POST']>
+2024-12-06 19:57:58,707 - DEBUG - send_request_body.complete
+2024-12-06 19:57:58,707 - DEBUG - receive_response_headers.started request=<Request [b'POST']>
+2024-12-06 19:58:10,047 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Sat, 07 Dec 2024 01:58:10 GMT'), (b'Content-Type', b'application/json'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'openai-version', b'2020-10-01'), (b'openai-organization', b'user-sm8tiojyt2lbywnwarixsqgr'), (b'x-request-id', b'req_c8caf2120a3dbd2e8ca39647a49dd163'), (b'openai-processing-ms', b'10960'), (b'access-control-allow-origin', b'*'), (b'strict-transport-security', b'max-age=31536000; includeSubDomains; preload'), (b'CF-Cache-Status', b'DYNAMIC'), (b'Set-Cookie', b'__cf_bm=TrauTpUAbo1Ixlzl3k5yWCRrbfJBo83WcZbqKhMW1mw-1733536690-1.0.1.1-5UeiEEK1XdNLjFpN7uhJIpHws4nK_b2Wg80OOAzNnDyTxzR9U_Lh0nY1qaj438EfoLtmONJyF0ALog4YTkolFA; path=/; expires=Sat, 07-Dec-24 02:28:10 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None'), (b'X-Content-Type-Options', b'nosniff'), (b'Set-Cookie', b'_cfuvid=PNx5Eh9NKnM_9_u9K6khcCQSjgtSST5LY.NzABAnQRI-1733536690850-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None'), (b'Server', b'cloudflare'), (b'CF-RAY', b'8ee0e8772ab12a48-ORD'), (b'Content-Encoding', b'br'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2024-12-06 19:58:10,048 - INFO - HTTP Request: POST https://api.openai.com/v1/images/generations "HTTP/1.1 200 OK"
+2024-12-06 19:58:10,048 - DEBUG - receive_response_body.started request=<Request [b'POST']>
+2024-12-06 19:58:10,048 - DEBUG - receive_response_body.complete
+2024-12-06 19:58:10,048 - DEBUG - response_closed.started
+2024-12-06 19:58:10,048 - DEBUG - response_closed.complete
+2024-12-06 19:58:10,048 - DEBUG - HTTP Response: POST https://api.openai.com/v1/images/generations "200 OK" Headers([('date', 'Sat, 07 Dec 2024 01:58:10 GMT'), ('content-type', 'application/json'), ('transfer-encoding', 'chunked'), ('connection', 'keep-alive'), ('openai-version', '2020-10-01'), ('openai-organization', 'user-sm8tiojyt2lbywnwarixsqgr'), ('x-request-id', 'req_c8caf2120a3dbd2e8ca39647a49dd163'), ('openai-processing-ms', '10960'), ('access-control-allow-origin', '*'), ('strict-transport-security', 'max-age=31536000; includeSubDomains; preload'), ('cf-cache-status', 'DYNAMIC'), ('set-cookie', '__cf_bm=TrauTpUAbo1Ixlzl3k5yWCRrbfJBo83WcZbqKhMW1mw-1733536690-1.0.1.1-5UeiEEK1XdNLjFpN7uhJIpHws4nK_b2Wg80OOAzNnDyTxzR9U_Lh0nY1qaj438EfoLtmONJyF0ALog4YTkolFA; path=/; expires=Sat, 07-Dec-24 02:28:10 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None'), ('x-content-type-options', 'nosniff'), ('set-cookie', '_cfuvid=PNx5Eh9NKnM_9_u9K6khcCQSjgtSST5LY.NzABAnQRI-1733536690850-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None'), ('server', 'cloudflare'), ('cf-ray', '8ee0e8772ab12a48-ORD'), ('content-encoding', 'br'), ('alt-svc', 'h3=":443"; ma=86400')])
+2024-12-06 19:58:10,049 - DEBUG - request_id: req_c8caf2120a3dbd2e8ca39647a49dd163
+2024-12-06 19:58:10,052 - DEBUG - Starting new HTTPS connection (1): oaidalleapiprodscus.blob.core.windows.net:443
+2024-12-06 19:58:10,394 - DEBUG - https://oaidalleapiprodscus.blob.core.windows.net:443 "GET /private/org-PhkAIsgdYDgDklKA5BFwVY6t/user-Sm8tIojyT2lbYWNWARiXSQGr/img-nEBvsqafbDlP3QNSWRU8d2nt.png?st=2024-12-07T00%3A58%3A10Z&se=2024-12-07T02%3A58%3A10Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=d505667d-d6c1-4a0a-bac7-5c84a87759f8&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2024-12-06T22%3A32%3A59Z&ske=2024-12-07T22%3A32%3A59Z&sks=b&skv=2024-08-04&sig=eiEA8gAP0446ewp81SljxqTroWzCrj/9j%2BKuaQoAzBw%3D HTTP/11" 200 1649245
+2024-12-06 19:58:11,661 - DEBUG - STREAM b'IHDR' 16 13
+2024-12-06 19:58:11,661 - DEBUG - STREAM b'caBX' 41 14823
+2024-12-06 19:58:11,661 - DEBUG - b'caBX' 41 14823 (unknown)
+2024-12-06 19:58:11,661 - DEBUG - STREAM b'IDAT' 14876 65536
+2024-12-06 19:58:12,689 - DEBUG - Request options: {'method': 'post', 'url': '/images/generations', 'files': None, 'json_data': {'prompt': 'Professional wrestling company banner for "Crucible". Company description: a wrestling company with forge visuals. Create a wide promotional banner (1:5 aspect ratio) with dynamic wrestling imagery. Include the company name prominently. Make it exciting and eye-catching.', 'model': 'dall-e-3', 'n': 1, 'quality': 'standard', 'size': '1024x1024'}}
+2024-12-06 19:58:12,689 - DEBUG - Sending HTTP Request: POST https://api.openai.com/v1/images/generations
+2024-12-06 19:58:12,689 - DEBUG - send_request_headers.started request=<Request [b'POST']>
+2024-12-06 19:58:12,690 - DEBUG - send_request_headers.complete
+2024-12-06 19:58:12,690 - DEBUG - send_request_body.started request=<Request [b'POST']>
+2024-12-06 19:58:12,690 - DEBUG - send_request_body.complete
+2024-12-06 19:58:12,690 - DEBUG - receive_response_headers.started request=<Request [b'POST']>
+2024-12-06 19:58:22,663 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Sat, 07 Dec 2024 01:58:23 GMT'), (b'Content-Type', b'application/json'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'openai-version', b'2020-10-01'), (b'openai-organization', b'user-sm8tiojyt2lbywnwarixsqgr'), (b'x-request-id', b'req_809fb726018273fb63c8007cc6dc2fbe'), (b'openai-processing-ms', b'9895'), (b'access-control-allow-origin', b'*'), (b'strict-transport-security', b'max-age=31536000; includeSubDomains; preload'), (b'CF-Cache-Status', b'DYNAMIC'), (b'X-Content-Type-Options', b'nosniff'), (b'Server', b'cloudflare'), (b'CF-RAY', b'8ee0e8ce9cda2a48-ORD'), (b'Content-Encoding', b'br'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2024-12-06 19:58:22,663 - INFO - HTTP Request: POST https://api.openai.com/v1/images/generations "HTTP/1.1 200 OK"
+2024-12-06 19:58:22,663 - DEBUG - receive_response_body.started request=<Request [b'POST']>
+2024-12-06 19:58:22,664 - DEBUG - receive_response_body.complete
+2024-12-06 19:58:22,664 - DEBUG - response_closed.started
+2024-12-06 19:58:22,664 - DEBUG - response_closed.complete
+2024-12-06 19:58:22,664 - DEBUG - HTTP Response: POST https://api.openai.com/v1/images/generations "200 OK" Headers({'date': 'Sat, 07 Dec 2024 01:58:23 GMT', 'content-type': 'application/json', 'transfer-encoding': 'chunked', 'connection': 'keep-alive', 'openai-version': '2020-10-01', 'openai-organization': 'user-sm8tiojyt2lbywnwarixsqgr', 'x-request-id': 'req_809fb726018273fb63c8007cc6dc2fbe', 'openai-processing-ms': '9895', 'access-control-allow-origin': '*', 'strict-transport-security': 'max-age=31536000; includeSubDomains; preload', 'cf-cache-status': 'DYNAMIC', 'x-content-type-options': 'nosniff', 'server': 'cloudflare', 'cf-ray': '8ee0e8ce9cda2a48-ORD', 'content-encoding': 'br', 'alt-svc': 'h3=":443"; ma=86400'})
+2024-12-06 19:58:22,664 - DEBUG - request_id: req_809fb726018273fb63c8007cc6dc2fbe
+2024-12-06 19:58:22,666 - DEBUG - Starting new HTTPS connection (1): oaidalleapiprodscus.blob.core.windows.net:443
+2024-12-06 19:58:22,876 - DEBUG - https://oaidalleapiprodscus.blob.core.windows.net:443 "GET /private/org-PhkAIsgdYDgDklKA5BFwVY6t/user-Sm8tIojyT2lbYWNWARiXSQGr/img-8RM0a3UtX5J08bfBnuf5uB55.png?st=2024-12-07T00%3A58%3A23Z&se=2024-12-07T02%3A58%3A23Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=d505667d-d6c1-4a0a-bac7-5c84a87759f8&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2024-12-07T00%3A36%3A53Z&ske=2024-12-08T00%3A36%3A53Z&sks=b&skv=2024-08-04&sig=GXp/cI2EC/mUIkb5T4%2B59AK/EXg4vKc9CqyfvMwsdbg%3D HTTP/11" 200 1952879
+2024-12-06 19:58:23,775 - DEBUG - STREAM b'IHDR' 16 13
+2024-12-06 19:58:23,775 - DEBUG - STREAM b'caBX' 41 14823
+2024-12-06 19:58:23,775 - DEBUG - b'caBX' 41 14823 (unknown)
+2024-12-06 19:58:23,775 - DEBUG - STREAM b'IDAT' 14876 65536
+2024-12-06 19:58:24,807 - DEBUG - Request options: {'method': 'post', 'url': '/images/generations', 'files': None, 'json_data': {'prompt': 'Professional wrestling backdrop for "Crucible". Company description: a wrestling company with forge visuals. Create a dramatic arena backdrop with the company\'s branding. Should be suitable for a wrestling event, with atmospheric lighting and professional design.', 'model': 'dall-e-3', 'n': 1, 'quality': 'standard', 'size': '1024x1024'}}
+2024-12-06 19:58:24,808 - DEBUG - Sending HTTP Request: POST https://api.openai.com/v1/images/generations
+2024-12-06 19:58:24,808 - DEBUG - send_request_headers.started request=<Request [b'POST']>
+2024-12-06 19:58:24,808 - DEBUG - send_request_headers.complete
+2024-12-06 19:58:24,808 - DEBUG - send_request_body.started request=<Request [b'POST']>
+2024-12-06 19:58:24,808 - DEBUG - send_request_body.complete
+2024-12-06 19:58:24,808 - DEBUG - receive_response_headers.started request=<Request [b'POST']>
+2024-12-06 19:58:38,156 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Sat, 07 Dec 2024 01:58:38 GMT'), (b'Content-Type', b'application/json'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'openai-version', b'2020-10-01'), (b'openai-organization', b'user-sm8tiojyt2lbywnwarixsqgr'), (b'x-request-id', b'req_228e9032a36119fc4d65c16d647b4f94'), (b'openai-processing-ms', b'13264'), (b'access-control-allow-origin', b'*'), (b'strict-transport-security', b'max-age=31536000; includeSubDomains; preload'), (b'CF-Cache-Status', b'DYNAMIC'), (b'X-Content-Type-Options', b'nosniff'), (b'Server', b'cloudflare'), (b'CF-RAY', b'8ee0e91a58262a48-ORD'), (b'Content-Encoding', b'br'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2024-12-06 19:58:38,157 - INFO - HTTP Request: POST https://api.openai.com/v1/images/generations "HTTP/1.1 200 OK"
+2024-12-06 19:58:38,157 - DEBUG - receive_response_body.started request=<Request [b'POST']>
+2024-12-06 19:58:38,157 - DEBUG - receive_response_body.complete
+2024-12-06 19:58:38,157 - DEBUG - response_closed.started
+2024-12-06 19:58:38,157 - DEBUG - response_closed.complete
+2024-12-06 19:58:38,157 - DEBUG - HTTP Response: POST https://api.openai.com/v1/images/generations "200 OK" Headers({'date': 'Sat, 07 Dec 2024 01:58:38 GMT', 'content-type': 'application/json', 'transfer-encoding': 'chunked', 'connection': 'keep-alive', 'openai-version': '2020-10-01', 'openai-organization': 'user-sm8tiojyt2lbywnwarixsqgr', 'x-request-id': 'req_228e9032a36119fc4d65c16d647b4f94', 'openai-processing-ms': '13264', 'access-control-allow-origin': '*', 'strict-transport-security': 'max-age=31536000; includeSubDomains; preload', 'cf-cache-status': 'DYNAMIC', 'x-content-type-options': 'nosniff', 'server': 'cloudflare', 'cf-ray': '8ee0e91a58262a48-ORD', 'content-encoding': 'br', 'alt-svc': 'h3=":443"; ma=86400'})
+2024-12-06 19:58:38,157 - DEBUG - request_id: req_228e9032a36119fc4d65c16d647b4f94
+2024-12-06 19:58:38,159 - DEBUG - Starting new HTTPS connection (1): oaidalleapiprodscus.blob.core.windows.net:443
+2024-12-06 19:58:38,424 - DEBUG - https://oaidalleapiprodscus.blob.core.windows.net:443 "GET /private/org-PhkAIsgdYDgDklKA5BFwVY6t/user-Sm8tIojyT2lbYWNWARiXSQGr/img-n7NIZ2rryOEyMiuvtvkYOjve.png?st=2024-12-07T00%3A58%3A38Z&se=2024-12-07T02%3A58%3A38Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=d505667d-d6c1-4a0a-bac7-5c84a87759f8&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2024-12-06T23%3A02%3A18Z&ske=2024-12-07T23%3A02%3A18Z&sks=b&skv=2024-08-04&sig=foJsSYCnBfaqAeHll9Sw2uD2pDGxCDq2AFPhySubZRs%3D HTTP/11" 200 2084938
+2024-12-06 19:58:39,422 - DEBUG - STREAM b'IHDR' 16 13
+2024-12-06 19:58:39,422 - DEBUG - STREAM b'caBX' 41 14823
+2024-12-06 19:58:39,422 - DEBUG - b'caBX' 41 14823 (unknown)
+2024-12-06 19:58:39,422 - DEBUG - STREAM b'IDAT' 14876 65536
+2024-12-06 19:58:46,874 - DEBUG - Request options: {'method': 'post', 'url': '/images/generations', 'files': None, 'json_data': {'prompt': 'Professional wrestling promotional photo. Mustachio is a tall and slender Middle Eastern wrestler with a twirly mustache and a turban adorning his head. The image should be a high-quality, professional headshot style photo with good lighting and a neutral background. The subject should be looking directly at the camera with a confident expression.', 'model': 'dall-e-3', 'n': 1, 'quality': 'standard', 'size': '1024x1024'}}
+2024-12-06 19:58:46,875 - DEBUG - Sending HTTP Request: POST https://api.openai.com/v1/images/generations
+2024-12-06 19:58:46,875 - DEBUG - close.started
+2024-12-06 19:58:46,875 - DEBUG - close.complete
+2024-12-06 19:58:46,875 - DEBUG - connect_tcp.started host='api.openai.com' port=443 local_address=None timeout=5.0 socket_options=None
+2024-12-06 19:58:46,947 - DEBUG - connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000001D9689B3290>
+2024-12-06 19:58:46,947 - DEBUG - start_tls.started ssl_context=<ssl.SSLContext object at 0x000001D9674A28D0> server_hostname='api.openai.com' timeout=5.0
+2024-12-06 19:58:46,969 - DEBUG - start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x000001D9673CC4D0>
+2024-12-06 19:58:46,969 - DEBUG - send_request_headers.started request=<Request [b'POST']>
+2024-12-06 19:58:46,970 - DEBUG - send_request_headers.complete
+2024-12-06 19:58:46,970 - DEBUG - send_request_body.started request=<Request [b'POST']>
+2024-12-06 19:58:46,970 - DEBUG - send_request_body.complete
+2024-12-06 19:58:46,970 - DEBUG - receive_response_headers.started request=<Request [b'POST']>
+2024-12-06 19:58:58,650 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Sat, 07 Dec 2024 01:58:59 GMT'), (b'Content-Type', b'application/json'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'openai-version', b'2020-10-01'), (b'openai-organization', b'user-sm8tiojyt2lbywnwarixsqgr'), (b'x-request-id', b'req_35fe5ce54829e2b22b17a3c36153f021'), (b'openai-processing-ms', b'11588'), (b'access-control-allow-origin', b'*'), (b'strict-transport-security', b'max-age=31536000; includeSubDomains; preload'), (b'CF-Cache-Status', b'DYNAMIC'), (b'X-Content-Type-Options', b'nosniff'), (b'Server', b'cloudflare'), (b'CF-RAY', b'8ee0e9a4dc53114d-ORD'), (b'Content-Encoding', b'br'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2024-12-06 19:58:58,650 - INFO - HTTP Request: POST https://api.openai.com/v1/images/generations "HTTP/1.1 200 OK"
+2024-12-06 19:58:58,650 - DEBUG - receive_response_body.started request=<Request [b'POST']>
+2024-12-06 19:58:58,651 - DEBUG - receive_response_body.complete
+2024-12-06 19:58:58,651 - DEBUG - response_closed.started
+2024-12-06 19:58:58,652 - DEBUG - response_closed.complete
+2024-12-06 19:58:58,652 - DEBUG - HTTP Response: POST https://api.openai.com/v1/images/generations "200 OK" Headers({'date': 'Sat, 07 Dec 2024 01:58:59 GMT', 'content-type': 'application/json', 'transfer-encoding': 'chunked', 'connection': 'keep-alive', 'openai-version': '2020-10-01', 'openai-organization': 'user-sm8tiojyt2lbywnwarixsqgr', 'x-request-id': 'req_35fe5ce54829e2b22b17a3c36153f021', 'openai-processing-ms': '11588', 'access-control-allow-origin': '*', 'strict-transport-security': 'max-age=31536000; includeSubDomains; preload', 'cf-cache-status': 'DYNAMIC', 'x-content-type-options': 'nosniff', 'server': 'cloudflare', 'cf-ray': '8ee0e9a4dc53114d-ORD', 'content-encoding': 'br', 'alt-svc': 'h3=":443"; ma=86400'})
+2024-12-06 19:58:58,652 - DEBUG - request_id: req_35fe5ce54829e2b22b17a3c36153f021
+2024-12-06 19:58:58,653 - DEBUG - Starting new HTTPS connection (1): oaidalleapiprodscus.blob.core.windows.net:443
+2024-12-06 19:58:58,908 - DEBUG - https://oaidalleapiprodscus.blob.core.windows.net:443 "GET /private/org-PhkAIsgdYDgDklKA5BFwVY6t/user-Sm8tIojyT2lbYWNWARiXSQGr/img-WYxjfNhTnqXCknnjXFS8zxL9.png?st=2024-12-07T00%3A58%3A59Z&se=2024-12-07T02%3A58%3A59Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=d505667d-d6c1-4a0a-bac7-5c84a87759f8&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2024-12-06T22%3A51%3A40Z&ske=2024-12-07T22%3A51%3A40Z&sks=b&skv=2024-08-04&sig=xCnKGTyKmVcwsLhdJeu01RafNiXj5g8je0IPCxtqCOo%3D HTTP/11" 200 1742796
+2024-12-06 19:58:59,783 - DEBUG - STREAM b'IHDR' 16 13
+2024-12-06 19:58:59,783 - DEBUG - STREAM b'caBX' 41 14823
+2024-12-06 19:58:59,783 - DEBUG - b'caBX' 41 14823 (unknown)
+2024-12-06 19:58:59,783 - DEBUG - STREAM b'IDAT' 14876 65536
+2024-12-06 19:59:00,809 - DEBUG - Request options: {'method': 'post', 'url': '/images/generations', 'files': None, 'json_data': {'prompt': 'Professional wrestling promotional photo. Mustafa Godafa is a tall, lean middle eastern man with a twirly mustache and turban perched atop his head. The image should be a high-quality, professional headshot style photo with good lighting and a neutral background. The subject should be looking directly at the camera with a confident expression.', 'model': 'dall-e-3', 'n': 1, 'quality': 'standard', 'size': '1024x1024'}}
+2024-12-06 19:59:00,809 - DEBUG - Sending HTTP Request: POST https://api.openai.com/v1/images/generations
+2024-12-06 19:59:00,809 - DEBUG - send_request_headers.started request=<Request [b'POST']>
+2024-12-06 19:59:00,810 - DEBUG - send_request_headers.complete
+2024-12-06 19:59:00,810 - DEBUG - send_request_body.started request=<Request [b'POST']>
+2024-12-06 19:59:00,810 - DEBUG - send_request_body.complete
+2024-12-06 19:59:00,810 - DEBUG - receive_response_headers.started request=<Request [b'POST']>
+2024-12-06 19:59:11,577 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Sat, 07 Dec 2024 01:59:12 GMT'), (b'Content-Type', b'application/json'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'openai-version', b'2020-10-01'), (b'openai-organization', b'user-sm8tiojyt2lbywnwarixsqgr'), (b'x-request-id', b'req_fa8d32093cba80bf58464c4326630294'), (b'openai-processing-ms', b'10617'), (b'access-control-allow-origin', b'*'), (b'strict-transport-security', b'max-age=31536000; includeSubDomains; preload'), (b'CF-Cache-Status', b'DYNAMIC'), (b'X-Content-Type-Options', b'nosniff'), (b'Server', b'cloudflare'), (b'CF-RAY', b'8ee0e9fb5bd8114d-ORD'), (b'Content-Encoding', b'br'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2024-12-06 19:59:11,578 - INFO - HTTP Request: POST https://api.openai.com/v1/images/generations "HTTP/1.1 200 OK"
+2024-12-06 19:59:11,578 - DEBUG - receive_response_body.started request=<Request [b'POST']>
+2024-12-06 19:59:11,578 - DEBUG - receive_response_body.complete
+2024-12-06 19:59:11,578 - DEBUG - response_closed.started
+2024-12-06 19:59:11,578 - DEBUG - response_closed.complete
+2024-12-06 19:59:11,578 - DEBUG - HTTP Response: POST https://api.openai.com/v1/images/generations "200 OK" Headers({'date': 'Sat, 07 Dec 2024 01:59:12 GMT', 'content-type': 'application/json', 'transfer-encoding': 'chunked', 'connection': 'keep-alive', 'openai-version': '2020-10-01', 'openai-organization': 'user-sm8tiojyt2lbywnwarixsqgr', 'x-request-id': 'req_fa8d32093cba80bf58464c4326630294', 'openai-processing-ms': '10617', 'access-control-allow-origin': '*', 'strict-transport-security': 'max-age=31536000; includeSubDomains; preload', 'cf-cache-status': 'DYNAMIC', 'x-content-type-options': 'nosniff', 'server': 'cloudflare', 'cf-ray': '8ee0e9fb5bd8114d-ORD', 'content-encoding': 'br', 'alt-svc': 'h3=":443"; ma=86400'})
+2024-12-06 19:59:11,578 - DEBUG - request_id: req_fa8d32093cba80bf58464c4326630294
+2024-12-06 19:59:11,580 - DEBUG - Starting new HTTPS connection (1): oaidalleapiprodscus.blob.core.windows.net:443
+2024-12-06 19:59:12,524 - DEBUG - https://oaidalleapiprodscus.blob.core.windows.net:443 "GET /private/org-PhkAIsgdYDgDklKA5BFwVY6t/user-Sm8tIojyT2lbYWNWARiXSQGr/img-caimjLFEtMniKiCuOxkHQFug.png?st=2024-12-07T00%3A59%3A12Z&se=2024-12-07T02%3A59%3A12Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=d505667d-d6c1-4a0a-bac7-5c84a87759f8&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2024-12-06T22%3A51%3A18Z&ske=2024-12-07T22%3A51%3A18Z&sks=b&skv=2024-08-04&sig=fDraQUX/xIERKfG9NMOZd0LRG6gbkPLi9COOKotcSSc%3D HTTP/11" 200 1590522
+2024-12-06 19:59:14,443 - DEBUG - STREAM b'IHDR' 16 13
+2024-12-06 19:59:14,443 - DEBUG - STREAM b'caBX' 41 14823
+2024-12-06 19:59:14,443 - DEBUG - b'caBX' 41 14823 (unknown)
+2024-12-06 19:59:14,443 - DEBUG - STREAM b'IDAT' 14876 65536

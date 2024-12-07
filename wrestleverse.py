@@ -7,6 +7,7 @@ import pandas as pd
 import random
 import os
 import time
+import requests
 import pyodbc
 from openai import OpenAI
 import datetime
@@ -2139,6 +2140,14 @@ class WrestleverseApp:
             8: "Mixed Race"
         }
         return race_map.get(race_number, "Unknown")
+
+    def resize_image(self, image_data, size):
+        """Helper function to resize images"""
+        image = Image.open(io.BytesIO(image_data))
+        image = image.resize(size, Image.Resampling.LANCZOS)
+        output = io.BytesIO()
+        image.save(output, format='JPEG')
+        return output.getvalue()
 
 if __name__ == "__main__":
     root = tk.Tk()
