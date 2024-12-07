@@ -549,7 +549,7 @@ class WrestleverseApp:
                 if not bio:
                     logging.error("Failed to generate biography")
                     return
-
+                style = self.get_style_from_gpt(bio) 
                 race = self.get_race_from_gpt(name, f"{description}\n\nBiography: {bio}")
                 picture_name = f"{name.replace(' ', '').lower()}"
                 picture_name = f"{picture_name[:26]}.jpg" 
@@ -584,7 +584,7 @@ class WrestleverseApp:
                     "Retired": False,  # Will be converted to 0
                     "NonWrestler": False,  # Will be converted to 0
                     "Celebridad": self.ensure_byte(0),
-                    "Style": self.ensure_byte(random.randint(1, 17)),
+                    "Style": style,
                     "Freelance": False,  # Will be converted to 0
                     "Loyalty": 0,
                     "TrueBorn": False,  # Will be converted to 0
@@ -1453,7 +1453,41 @@ class WrestleverseApp:
             self.skill_entries[skill] = {"min": min_var, "max": max_var}
         save_btn = ttk.Button(self.preset_window, text="Save Preset", command=self.save_new_preset)
         save_btn.pack(pady=10)
-
+    def get_style_from_gpt(self, bio):
+        """Determine wrestling style number based on bio text"""
+        prompt = (
+            "Based on this wrestler's biography, select the most appropriate wrestling style number from this list:\n"
+            "1-Regular\n2-Entertainer\n3-Comedy\n4-Powerhouse\n5-Impactful\n6-Striker\n"
+            "7-Brawler\n8-Hardcore\n9-Psychopath\n10-Luchador\n11-High Flyer\n"
+            "12-Technician\n13-Technician Flyer\n14-Technician Striker\n15-Daredevil\n"
+            "16-MMA Crossover\n17-Never Wrestles\n\n"
+            f"Biography: {bio}\n\n"
+            "Respond with ONLY the number (1-17) that best matches their style. For example, if you choose striker you'd only return '6' and nothing else."
+        )
+        
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            style_text = response.choices[0].message.content.strip()
+            logging.debug(f"Style text: {style_text}")
+            # Try to convert to integer
+            try:
+                style = int(style_text)
+                # Validate range
+                if 1 <= style <= 17:
+                    return style
+            except ValueError:
+                pass
+            
+            # If we get here, either the conversion failed or number was out of range
+            return 1
+            
+        except Exception as e:
+            logging.error(f"Error getting style from GPT: {e}")
+            return 1
+    
     def save_new_preset(self):
         preset_name = self.preset_name_var.get().strip()
         if not preset_name:
