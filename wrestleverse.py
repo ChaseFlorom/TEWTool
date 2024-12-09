@@ -31,8 +31,8 @@ class WrestleverseApp:
         self.bio_prompt = "Create a biography for a professional wrestler."
         self.access_db_path = ""
         self.pictures_path = ""
-        self.start_date_str = ""  # New field for start date
-        self.start_date = datetime.datetime(2020,1,1)  # default if not provided
+        self.start_date_str = ""
+        self.start_date = datetime.datetime(2020,1,1)
         self.client = None
         self.load_settings()
         if self.api_key:
@@ -91,7 +91,6 @@ class WrestleverseApp:
                 "TrueBorn", "YoungLion", "HomeArena", "TippyToe", "GeogTag1", "GeogTag2", "GeogTag3", "HQ", "HOF"
             ]
 
-            # Get the next available UID
             uid = self.uid_start
             if self.access_db_path and os.path.exists(self.access_db_path):
                 conn_str = (
@@ -111,7 +110,6 @@ class WrestleverseApp:
             bio_data = []
             notes_data = []
 
-            # Extract widget values before accessing
             company_data_list = []
             for company in self.companies:
                 name = company["name"].get().strip() if company["name"] else ""
@@ -128,22 +126,17 @@ class WrestleverseApp:
                 description = company_data["description"]
                 size = company_data["size"]
 
-                # Handle missing name/description for companies as well (just in case)
                 if not name and not description:
-                    # No name, no description
                     prompt = f"Generate a name and description for a {size.lower()} professional wrestling company."
                     resp = self.client.chat.completions.create(
                         model="gpt-3.5-turbo",
                         messages=[{"role":"user","content":prompt}]
                     )
                     text = resp.choices[0].message.content.strip()
-                    # We'll assume the response has a name and description in some form.
-                    # For simplicity, just split by newline and take the first line as name, rest as description.
                     lines = text.split('\n')
                     name = lines[0].strip() if lines else "Default Company"
                     description = ' '.join(lines[1:]).strip() if len(lines)>1 else "A professional wrestling company."
                 elif not name:
-                    # Have description, need name
                     name_prompt = f"Generate a name for a {size.lower()} professional wrestling company with the following description: {description}"
                     resp = self.client.chat.completions.create(
                         model="gpt-3.5-turbo",
@@ -151,7 +144,6 @@ class WrestleverseApp:
                     )
                     name = resp.choices[0].message.content.strip()
                 elif not description:
-                    # Have name, need description
                     desc_prompt = f"Generate a description for a {size.lower()} professional wrestling company named {name}."
                     resp = self.client.chat.completions.create(
                         model="gpt-3.5-turbo",
@@ -160,17 +152,10 @@ class WrestleverseApp:
                     description = resp.choices[0].message.content.strip()
 
                 base_name = name.replace(' ', '').replace('.', '').lower()
-
-                # For logo: truncate to 26 chars + .jpg = 30 chars max
                 logo_name = f"{base_name[:26]}.jpg"
-
-                # For backdrop: truncate to 24 chars + BD.jpg = 30 chars max
                 backdrop_name = f"{base_name[:24]}BD.jpg"
-
-                # For banner: truncate to 24 chars + BN.jpg = 30 chars max
                 banner_name = f"{base_name[:24]}BN.jpg"
 
-                # Generate company row data
                 company_row = [
                     uid,
                     name,
@@ -216,11 +201,9 @@ class WrestleverseApp:
                 ]
                 companies_data.append(company_row)
 
-                # Generate and store bio
                 bio = self.generate_company_bio(name, description, size)
                 bio_data.append([uid, bio])
 
-                # Store description in notes with image_generated flag
                 notes_data.append({
                     "Name": name,
                     "Description": description,
@@ -236,12 +219,12 @@ class WrestleverseApp:
             if self.access_db_path and os.path.exists(self.access_db_path):
                 logging.debug("Attempting to save to Access database.")
                 try:
+                    conn_str = (
+                        r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
+                        f'DBQ={self.access_db_path};'
+                        'PWD=20YearsOfTEW;'
+                    )
                     for company_row in companies_data:
-                        conn_str = (
-                            r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
-                            f'DBQ={self.access_db_path};'
-                            'PWD=20YearsOfTEW;'
-                        )
                         conn = pyodbc.connect(conn_str)
                         cursor = conn.cursor()
                         sql_insert_company = """
@@ -258,7 +241,6 @@ class WrestleverseApp:
                              ?, ?, ?, ?, ?, ?,
                              ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """
-                        logging.debug(f"Executing SQL with values: {company_row}")
                         cursor.execute(sql_insert_company, company_row)
                         sql_insert_schedule = "INSERT INTO tblFedSchedule ([FedUID], [Strategy]) VALUES (?, ?)"
                         schedule_values = (company_row[0], '5')
@@ -270,7 +252,6 @@ class WrestleverseApp:
                     cursor = conn.cursor()
                     for bio_row in bio_data:
                         sql_insert_bio = "INSERT INTO tblFedBio ([UID], [Profile]) VALUES (?, ?)"
-                        logging.debug(f"Executing Bio SQL with values: {bio_row}")
                         cursor.execute(sql_insert_bio, bio_row)
                     conn.commit()
                     conn.close()
@@ -279,7 +260,6 @@ class WrestleverseApp:
                     logging.error(f"Error saving to Access database: {e}", exc_info=True)
                     messagebox.showerror("Error", f"Could not save to Access database: {str(e)}")
 
-            # Generate logo descriptions
             for note in notes_data:
                 try:
                     logo_prompt = (
@@ -293,7 +273,6 @@ class WrestleverseApp:
                     logging.error(f"Error generating logo description: {e}")
                     note['logo_description'] = ""
 
-            # Save to Excel
             try:
                 companies_df = pd.DataFrame(companies_data, columns=companies_columns)
                 bio_df = pd.DataFrame(bio_data, columns=["UID", "Bio"])
@@ -477,7 +456,6 @@ class WrestleverseApp:
             contract_data = []
             notes_data = []
 
-            # Parse start date from settings
             try:
                 if self.start_date_str:
                     self.start_date = datetime.datetime.strptime(self.start_date_str, "%Y-%m-%d")
@@ -511,7 +489,7 @@ class WrestleverseApp:
             wrestler_data_list = []
             for wrestler in self.wrestlers:
                 try:
-                    if wrestler["frame"].winfo_exists(): 
+                    if wrestler["frame"].winfo_exists():
                         data = {
                             'name': wrestler["name"].get().strip() if wrestler["name"].winfo_exists() else "",
                             'gender': wrestler["gender"].get().strip() if hasattr(wrestler["gender"], "get") else "Male",
@@ -533,9 +511,10 @@ class WrestleverseApp:
                 gender = wrestler_data['gender']
                 description = wrestler_data['description']
 
-                # If both name and description are empty:
+                # Use player-provided description if available
+                player_description = description if description else ""
+
                 if not name and not description:
-                    # Just have gender
                     prompt = f"Generate a name and description for a professional wrestler. The wrestler's gender is {gender}."
                     resp = self.client.chat.completions.create(
                         model="gpt-3.5-turbo",
@@ -546,7 +525,6 @@ class WrestleverseApp:
                     name = lines[0].strip() if lines else "Default Wrestler"
                     description = ' '.join(lines[1:]).strip() if len(lines)>1 else "A professional wrestler."
                 elif not name:
-                    # have description, need name
                     prompt = f"Generate a name for a professional wrestler. The wrestler's gender is {gender}. Description: {description}"
                     resp = self.client.chat.completions.create(
                         model="gpt-3.5-turbo",
@@ -554,7 +532,6 @@ class WrestleverseApp:
                     )
                     name = resp.choices[0].message.content.strip()
                 elif not description:
-                    # have name, need description
                     prompt = f"Generate a description for a professional wrestler named {name}. The wrestler's gender is {gender}."
                     resp = self.client.chat.completions.create(
                         model="gpt-3.5-turbo",
@@ -567,7 +544,7 @@ class WrestleverseApp:
 
                 shortname = name.split()[0][:20] if name else ''
                 gender_value = 1 if gender.lower() == 'male' else 5
-                # Determine age from GPT based on description and "old" or "young"
+
                 age_prompt = (
                     f"Given this wrestler's description: {description}\n"
                     f"and gender {gender}, estimate their age at the start date. If the description suggests 'old', choose an older age (40-50). If 'young' choose younger (16-20). Otherwise pick an age between 16 and 50.\n"
@@ -586,27 +563,19 @@ class WrestleverseApp:
                 except:
                     pass
 
-                # Ensure debut date and birth date are before start date and wrestler is age by start_date
-                # Wrestler must be at least 16 by self.start_date
-                # We'll pick birth_date = start_date - age years
                 birth_year = self.start_date.year - age
-                # random birth month/day
                 birth_month = random.randint(1,12)
                 birth_day = random.randint(1,28)
                 birth_date = datetime.datetime(birth_year, birth_month, birth_day)
 
-                # Debut at some point before start date, but after they turn 16.
-                # They started wrestling at least at age 16
                 debut_age = random.randint(16, age)
                 debut_year = birth_year + debut_age
                 if debut_year >= self.start_date.year:
-                    # if debut year is not before start_date, adjust
                     debut_year = self.start_date.year - 1
                 debut_month = random.randint(1,12)
                 debut_day = random.randint(1,28)
                 debut_date = datetime.datetime(debut_year, debut_month, debut_day)
                 if debut_date >= self.start_date:
-                    # force debut date to be before start_date
                     debut_date = self.start_date - datetime.timedelta(days=30)
 
                 style = wrestler_data['skill_preset'] if wrestler_data['skill_preset'] != "Interpret" else "Interpret"
@@ -616,79 +585,97 @@ class WrestleverseApp:
                     f"Their wrestling style is best described as {style}."
                 )
                 bio = self.get_response_from_gpt(bio_prompt)
-
                 if not bio:
                     bio = "A professional wrestler."
 
                 style_num = self.get_style_from_gpt(bio) 
                 race = self.get_race_from_gpt(name, f"{description}\n\nBiography: {bio}")
-                picture_name = f"{name.replace(' ', '').lower()}"
-                picture_name = f"{picture_name[:26]}.jpg"
+                picture_name = f"{name.replace(' ', '').lower()[:26]}.jpg"
 
-                # Get roles/languages JSON
-                roles_lang_prompt = (
-                    f"Given the wrestler's name: {name}, description: {description}, and bio: {bio}, "
-                    "provide a JSON response that assigns true or false to these roles:\n"
-                    "- Wrestler\n- Occasional Wrestler\n- Manager\n- On-Screen Personality\n"
-                    "- Play-by-Play Commentator\n- Colour Commentator\n- Referee\n- Road Agent\n\n"
-                    "Also provide language fluency (1-4) for: English, Japanese, Spanish, French, Germanic, Mediterranean, Slavic, Hindi.\n\n"
+                roles_lang_body_prompt = (
+                    f"Given the wrestler's name: {name}, description: {player_description if player_description else description}, and bio: {bio}, "
+                    "provide a JSON response with the following:\n"
+                    "- Boolean values for: Wrestler, OccasionalWrestler, Manager, OnScreenPersonality, PlayByPlayCommentator, ColourCommentator, Referee, RoadAgent\n"
+                    "- Language fluencies (1-4) for English (always 4), Japanese, Spanish, French, Germanic, Mediterranean, Slavic, Hindi\n"
+                    "- A body type number (1-7) based on their description.\n\n"
                     "Return JSON only."
                 )
 
-                roles_lang_data = {
-                    "Wrestler": True,
-                    "OccasionalWrestler": False,
-                    "Manager": False,
-                    "OnScreenPersonality": False,
-                    "PlayByPlayCommentator": False,
-                    "ColourCommentator": False,
-                    "Referee": False,
-                    "RoadAgent": False,
-                    "Languages": {
-                        "English": 4,
-                        "Japanese": 1,
-                        "Spanish": 1,
-                        "French": 1,
-                        "Germanic": 1,
-                        "Mediterranean": 1,
-                        "Slavic": 1,
-                        "Hindi": 1
-                    }
-                }
+                # Try multiple attempts if parsing fails, for more bulletproof approach
+                # We'll loop a few times to try and get a valid JSON
+                attempts = 0
+                roles_lang_body_data = None
+                while attempts < 3 and roles_lang_body_data is None:
+                    attempts += 1
+                    try:
+                        roles_lang_body_response = self.client.chat.completions.create(
+                            model="gpt-3.5-turbo",
+                            messages=[{"role":"user","content":roles_lang_body_prompt}]
+                        )
+                        roles_lang_body_content = roles_lang_body_response.choices[0].message.content.strip()
+                        roles_lang_body_data = json.loads(roles_lang_body_content)
+                    except Exception as e:
+                        logging.error(f"Error getting roles/lang/body from GPT attempt {attempts}: {e}")
+                        roles_lang_body_data = None
 
-                try:
-                    roles_lang_response = self.client.chat.completions.create(
-                        model="gpt-3.5-turbo",
-                        messages=[{"role": "user", "content": roles_lang_prompt}]
-                    )
-                    roles_lang_content = roles_lang_response.choices[0].message.content.strip()
-                    roles_lang_data = json.loads(roles_lang_content)
-                except Exception as e:
-                    logging.error(f"Error getting roles/lang from GPT: {e}")
+                # Default fallback if still None
+                if roles_lang_body_data is None:
+                    roles_lang_body_data = {
+                        "Wrestler": True,
+                        "OccasionalWrestler": False,
+                        "Manager": False,
+                        "OnScreenPersonality": False,
+                        "PlayByPlayCommentator": False,
+                        "ColourCommentator": False,
+                        "Referee": False,
+                        "RoadAgent": False,
+                        "Languages": {
+                            "English": 4,
+                            "Japanese": 1,
+                            "Spanish": 2,
+                            "French": 2,
+                            "Germanic": 2,
+                            "Mediterranean": 2,
+                            "Slavic": 1,
+                            "Hindi": 1
+                        },
+                        "BodyType": 1
+                    }
 
                 def bool_to_access(val):
                     return -1 if val else 0
 
-                position_wrestler = bool_to_access(roles_lang_data.get("Wrestler", False))
-                position_occasional = bool_to_access(roles_lang_data.get("OccasionalWrestler", False))
-                position_manager = bool_to_access(roles_lang_data.get("Manager", False))
-                position_personality = bool_to_access(roles_lang_data.get("OnScreenPersonality", False))
-                position_announcer = bool_to_access(roles_lang_data.get("PlayByPlayCommentator", False))
-                position_colour = bool_to_access(roles_lang_data.get("ColourCommentator", False))
-                position_referee = bool_to_access(roles_lang_data.get("Referee", False))
-                position_roadagent = bool_to_access(roles_lang_data.get("RoadAgent", False))
+                position_wrestler = bool_to_access(roles_lang_body_data.get("Wrestler", False))
+                position_occasional = bool_to_access(roles_lang_body_data.get("OccasionalWrestler", False))
+                position_manager = bool_to_access(roles_lang_body_data.get("Manager", False))
+                position_personality = bool_to_access(roles_lang_body_data.get("OnScreenPersonality", False))
+                position_announcer = bool_to_access(roles_lang_body_data.get("PlayByPlayCommentator", False))
+                position_colour = bool_to_access(roles_lang_body_data.get("ColourCommentator", False))
+                position_referee = bool_to_access(roles_lang_body_data.get("Referee", False))
+                position_roadagent = bool_to_access(roles_lang_body_data.get("RoadAgent", False))
 
-                languages = roles_lang_data.get("Languages", {})
-                speak_english = languages.get("English", 1)
+                languages = roles_lang_body_data.get("Languages", {})
+                speak_english = languages.get("English", 4)
                 speak_japanese = languages.get("Japanese", 1)
-                speak_spanish = languages.get("Spanish", 1)
-                speak_french = languages.get("French", 1)
-                speak_germanic = languages.get("Germanic", 1)
-                speak_med = languages.get("Mediterranean", 1)
+                speak_spanish = languages.get("Spanish", 2)
+                speak_french = languages.get("French", 2)
+                speak_germanic = languages.get("Germanic", 2)
+                speak_med = languages.get("Mediterranean", 2)
                 speak_slavic = languages.get("Slavic", 1)
                 speak_hindi = languages.get("Hindi", 1)
 
-                # Worker row
+                body_type_code = roles_lang_body_data.get("BodyType", 1)
+                body_type_map = {
+                    1: "Average",
+                    2: "Skinny",
+                    3: "Toned",
+                    4: "Muscular",
+                    5: "Ripped",
+                    6: "Flabby",
+                    7: "Obese"
+                }
+                body_type_text = body_type_map.get(body_type_code, "Average")
+
                 worker_row = {
                     "UID": int(uid),
                     "User": False,
@@ -704,7 +691,7 @@ class WrestleverseApp:
                     "Birthday": birth_date,
                     "DebutDate": debut_date,
                     "DeathDate": "1666-01-01",
-                    "BodyType": self.ensure_byte(random.randint(0, 7)),
+                    "BodyType": self.ensure_byte(body_type_code),
                     "WorkerHeight": self.ensure_byte(random.randint(20, 42)),
                     "WorkerWeight": random.randint(150,350),
                     "WorkerMinWeight": 150,
@@ -767,7 +754,6 @@ class WrestleverseApp:
                 workers_data.append(worker_row_converted)
                 bio_data.append([uid, bio])
 
-                # Skill preset
                 if wrestler_data['skill_preset'] == "Interpret":
                     preset_name = self.select_skill_preset_with_chatgpt(
                         name,
@@ -782,8 +768,6 @@ class WrestleverseApp:
                 skills_data.append(skills)
 
                 if wrestler_data['company'] != "Freelancer":
-                    # Contract date must also be before start_date
-                    # Just pick a contract date some years before start_date
                     contract_began_year = self.start_date.year - random.randint(1,5)
                     contract_began_month = random.randint(1,12)
                     contract_began_day = random.randint(1,28)
@@ -793,18 +777,19 @@ class WrestleverseApp:
 
                     contract = self.generate_contract(wrestler_data, uid, wrestler_data['company'], contract_uid)
                     if contract:
-                        # Overwrite the contract began and debut date if needed
                         contract["ContractBeganDate"] = contract_began
                         contract["ContractDebutDate"] = datetime.datetime(1900,1,1)
                         contract_data.append(contract)
                         contract_uid += 1
 
+                    # Use body_type_text and race in physical prompt, and also the player-provided description if exists
                     physical_prompt = (
                         f"Based on this wrestler's details:\n"
                         f"Name: {name}\n"
-                        f"Description: {description}\n"
+                        f"Description: {player_description if player_description else description}\n"
                         f"Gender: {gender}\n"
                         f"Race: {self.get_race_name(race)}\n"
+                        f"Body Type: {body_type_text}\n"
                         f"Please provide a single sentence describing their physical appearance. "
                         f"Focus on height, build, and distinctive features."
                     )
@@ -814,7 +799,7 @@ class WrestleverseApp:
 
                 notes_data.append({
                     "Name": name,
-                    "Description": description,
+                    "Description": player_description if player_description else description,
                     "Gender": gender,
                     "Company": wrestler_data.get('company', 'Random'),
                     "Exclusive": wrestler_data.get('exclusive', 'Random'),
@@ -869,7 +854,6 @@ class WrestleverseApp:
                             )
                         """
 
-                        # The actual birth_date/debut_date are already chosen above
                         birth_date = worker_row["Birthday"]
                         debut_date = worker_row["DebutDate"]
                         death_date = "1666-01-01"
@@ -1108,23 +1092,67 @@ class WrestleverseApp:
                             contract_values.append(contract[f"PlasterCaster_Bool{i}"])
                         cursor.execute(sql_insert_contract, contract_values)
 
-                    # Region popularity
+                    # Enhanced popularity section: multiple attempts to get valid JSON
                     for worker_row in workers_data:
                         worker_uid = worker_row["UID"]
-                        # Just reuse name and bio from earlier (not stored but we have from loop)
-                        # We'll just get them from bio_data
                         bio_for_pop = ""
+                        name_for_pop = ""
                         for b in bio_data:
                             if b[0] == worker_uid:
                                 bio_for_pop = b[1]
                                 break
-                        name_for_pop = ""
                         for n in notes_data:
                             if n["Name"][:30] == worker_row["Name"]:
                                 name_for_pop = n["Name"]
+                                # We'll also pass player description if it was provided
+                                # but the function currently only uses name and bio.
+                                # Let's try to make popularity prompt robust by including description:
+                                player_desc_for_pop = n["Description"] if n["Description"] else ""
                                 break
-                        popularity_categories = self.get_region_popularity_from_gpt(name_for_pop, bio_for_pop)
-                        popularity_values = self.convert_popularity_categories_to_values(popularity_categories)
+
+                        pop_prompt = (
+                            f"Provide popularity categories for a wrestler named {name_for_pop} with the bio {bio_for_pop}.\n"
+                            "Consider the wrestler's description if available: " + player_desc_for_pop + "\n\n"
+                            "Regions:\n"
+                            "America\nCanada\nMexico\nBritish Isles\nJapan\nEurope\nOceania\nIndia\n\n"
+                            "The categories are: Unknown, Insignificant, Indie Popularity, Recognized, Well Known, Very Popular, Superstar.\n"
+                            "Return JSON only with keys as region names and values as categories.\n"
+                            "If unsure, use 'Unknown'."
+                        )
+
+                        popularity_data = None
+                        attempts = 0
+                        while attempts < 3 and popularity_data is None:
+                            attempts += 1
+                            try:
+                                response = self.client.chat.completions.create(
+                                    model="gpt-3.5-turbo",
+                                    messages=[{"role": "user", "content": pop_prompt}]
+                                )
+                                content = response.choices[0].message.content.strip()
+                                p_data = json.loads(content)
+                                required_keys = ["America","Canada","Mexico","British Isles","Japan","Europe","Oceania","India"]
+                                if all(key in p_data for key in required_keys):
+                                    popularity_data = p_data
+                                else:
+                                    raise ValueError("Missing required keys in popularity JSON.")
+                            except Exception as e:
+                                logging.error(f"Error getting popularity from GPT attempt {attempts}: {e}")
+                                popularity_data = None
+
+                        if popularity_data is None:
+                            popularity_data = {
+                                "America": "Unknown",
+                                "Canada": "Unknown",
+                                "Mexico": "Unknown",
+                                "British Isles": "Unknown",
+                                "Japan": "Unknown",
+                                "Europe": "Unknown",
+                                "Oceania": "Unknown",
+                                "India": "Unknown"
+                            }
+
+                        popularity_values = self.convert_popularity_categories_to_values(popularity_data)
                         columns = ["WorkerUID"] + [f"Over{i}" for i in range(1,58)]
                         placeholders = ", ".join(["?"] * 58)
                         sql_insert_over = f"INSERT INTO tblWorkerOver ({', '.join(columns)}) VALUES ({placeholders})"
@@ -1137,7 +1165,6 @@ class WrestleverseApp:
                     logging.error(f"Error saving to Access database: {e}", exc_info=True)
                     messagebox.showerror("Error", f"Could not save to Access database: {str(e)}")
 
-            # Save to Excel
             try:
                 excel_path = "wrestleverse_workers.xlsx"
                 if os.path.exists(excel_path):
@@ -1180,9 +1207,6 @@ class WrestleverseApp:
                 logging.error(f"Error saving Excel file: {e}", exc_info=True)
                 messagebox.showerror("Error", f"Could not save Excel file: {str(e)}")
 
-            # Generate physical descriptions again (already done)
-            # Nothing extra needed
-
             self.status_label.config(text="Status: Generation complete!")
             self.root.update_idletasks()
 
@@ -1193,37 +1217,18 @@ class WrestleverseApp:
             messagebox.showerror("Error", error_message)
 
     def get_region_popularity_from_gpt(self, name, bio):
-        prompt = (
-            f"Provide popularity categories for a wrestler named {name} with the bio {bio} regions in JSON format:\n\n"
-            "Regions:\n"
-            "America\nCanada\nMexico\nBritish Isles\nJapan\nEurope\nOceania\nIndia\n\n"
-            "The categories are: Unknown, Insignificant, Indie Popularity, Recognized, Well Known, Very Popular, Superstar.\n"
-            "Return JSON only."
-        )
-        try:
-            response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[{"role": "user", "content": prompt}]
-            )
-            content = response.choices[0].message.content.strip()
-            popularity_data = json.loads(content)
-            required_keys = ["America","Canada","Mexico","British Isles","Japan","Europe","Oceania","India"]
-            if all(key in popularity_data for key in required_keys):
-                return popularity_data
-            else:
-                return {r: "Unknown" for r in required_keys}
-        except Exception as e:
-            logging.error(f"Error getting popularity from GPT: {e}", exc_info=True)
-            return {
-                "America": "Unknown",
-                "Canada": "Unknown",
-                "Mexico": "Unknown",
-                "British Isles": "Unknown",
-                "Japan": "Unknown",
-                "Europe": "Unknown",
-                "Oceania": "Unknown",
-                "India": "Unknown"
-            }
+        # This function is still called but we now implement a more robust approach inline above.
+        # We'll keep this for compatibility, but we'll rely on the robust approach.
+        return {
+            "America": "Unknown",
+            "Canada": "Unknown",
+            "Mexico": "Unknown",
+            "British Isles": "Unknown",
+            "Japan": "Unknown",
+            "Europe": "Unknown",
+            "Oceania": "Unknown",
+            "India": "Unknown"
+        }
 
     def convert_popularity_categories_to_values(self, categories):
         def range_for_category(cat):
@@ -1383,7 +1388,6 @@ class WrestleverseApp:
         browse_pics_btn = ttk.Button(self.root, text="Browse", command=self.browse_pictures_path)
         browse_pics_btn.pack(pady=5)
 
-        # New setting: Start Date
         start_date_label = ttk.Label(self.root, text="Start Date (YYYY-MM-DD):")
         start_date_label.pack(pady=5)
         self.start_date_var = tk.StringVar(value=self.start_date_str)
