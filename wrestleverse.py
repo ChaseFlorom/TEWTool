@@ -42,6 +42,7 @@ class WrestleverseApp:
         self.wrestlers = []
         self.companies = []
         self.setup_main_menu()
+
     def add_company_form(self):
         company_frame = ttk.Frame(self.companies_frame, relief="ridge", borderwidth=2)
         company_frame.pack(fill="x", pady=5)
@@ -245,8 +246,6 @@ class WrestleverseApp:
                     logging.debug(f"Last SQL statement attempted: {sql_insert_company}")
                     messagebox.showerror("Error", f"Could not save to Access database: {str(e)}")
 
-
-
             # Inside the try block, just before saving to Excel:
             for note in notes_data:
                 try:
@@ -269,13 +268,13 @@ class WrestleverseApp:
                 logging.debug("Attempting to save data to Excel file.")
                 companies_df = pd.DataFrame(companies_data, columns=companies_columns)
                 bio_df = pd.DataFrame(bio_data, columns=["UID", "Bio"])
-                notes_df = pd.DataFrame(notes_data)  # Add this line
+                notes_df = pd.DataFrame(notes_data)  
                 
                 excel_path = "wrestleverse_companies.xlsx"
                 with pd.ExcelWriter(excel_path, engine='xlsxwriter') as writer:
                     companies_df.to_excel(writer, sheet_name="Companies", index=False)
                     bio_df.to_excel(writer, sheet_name="Bios", index=False)
-                    notes_df.to_excel(writer, sheet_name="Notes", index=False)  # This will now include all columns
+                    notes_df.to_excel(writer, sheet_name="Notes", index=False)
                 
                 logging.debug(f"Excel file saved successfully to {excel_path}")
                 messagebox.showinfo("Success", f"Companies saved to {excel_path}")
@@ -289,8 +288,6 @@ class WrestleverseApp:
         finally:
             self.status_label.config(text="Status: Companies generated successfully!")
             self.root.update_idletasks()
-
-
 
     def generate_company_name(self, description=None, size=None):
         prompt = "Generate a name for a professional wrestling company."
@@ -405,7 +402,7 @@ class WrestleverseApp:
         
         # Get company names for dropdown (just the names, not the UIDs)
         companies = self.get_companies()
-        company_names = ["Random"] + [company[1] for company in companies]  # Only use company names
+        company_names = ["Random"] + [company[1] for company in companies]
         
         company_var = tk.StringVar(value="Random")
         company_dropdown = ttk.Combobox(wrestler_frame, textvariable=company_var, values=company_names)
@@ -451,7 +448,7 @@ class WrestleverseApp:
             bio_data = []
             skills_data = []
             contract_data = []
-            notes_data = []  # Add this line
+            notes_data = []
             
             # Get starting UIDs from settings
             uid = self.uid_start  # For workers
@@ -472,17 +469,16 @@ class WrestleverseApp:
                 last_uid = result[0] if result[0] else 0
                 uid = max(last_uid + 1, self.uid_start)
                 
-                # Get next contract UID - using self.uid_start as minimum
+                # Get next contract UID
                 cursor.execute("SELECT MAX(UID) FROM tblContract")
                 result = cursor.fetchone()
                 last_contract_uid = result[0] if result[0] else 0
                 contract_uid = max(last_contract_uid + 1, self.uid_start)
 
-            # Collect all wrestler data first
             wrestler_data_list = []
             for wrestler in self.wrestlers:
                 try:
-                    if wrestler["frame"].winfo_exists():  # Check if the frame still exists
+                    if wrestler["frame"].winfo_exists(): 
                         data = {
                             'name': wrestler["name"].get().strip() if wrestler["name"].winfo_exists() else "",
                             'gender': wrestler["gender"].get().strip() if hasattr(wrestler["gender"], "get") else "Male",
@@ -502,43 +498,37 @@ class WrestleverseApp:
                 self.status_label.config(text=f"Status: Generating wrestler {index}/{total_wrestlers}...")
                 self.root.update_idletasks()
 
-                                # Initialize worker data with proper defaults
-                name = wrestler["name"].get().strip()
-                gender = wrestler["gender"].get().strip()
-                description = wrestler["description"].get().strip()
+                # Name, gender, description
+                name = wrestler_data['name']
+                gender = wrestler_data['gender']
+                description = wrestler_data['description']
                 
                 if not name:
                     name = self.generate_name(description=description, gender=gender)
-                name = name.replace('.', '').strip()  # Remove periods and any extra whitespace
-                name = name[:30]  # Then truncate to 30 chars
+                name = name.replace('.', '').strip()  
+                name = name[:30]  
 
                 shortname = name.split()[0][:20] if name else ''
                 gender_value = 1 if gender.lower() == 'male' else 5
                 weight = random.randint(150, 350)
-                min_weight = weight - 20  # Always 20 pounds less than current weight
+                min_weight = weight - 20  
                 max_weight = weight + random.randint(20, 50)
 
                 debut_date = datetime.datetime(
-                    random.randint(1980, 2023),  # Year between 1980 and 2023
-                    random.randint(1, 12),       # Month
-                    random.randint(1, 28)        # Day (avoiding potential month end issues)
+                    random.randint(1980, 2023),
+                    random.randint(1, 12),
+                    random.randint(1, 28)
                 )
                 debut_age = random.randint(16, 50) 
                 birth_year = debut_date.year - debut_age
                 birth_date = datetime.datetime(
                     birth_year,
-                    random.randint(1, 12),  # Random birth month
-                    random.randint(1, 28)   # Random birth day (avoiding month end issues)
+                    random.randint(1, 12),
+                    random.randint(1, 28)
                 )
-                                # Convert boolean values for Access DB
 
+                style = "Interpret"
 
-                logging.debug(f"Generated worker data for {wrestler_data['name']}")
-
-                # Get the style first
-                style = style_var.get() if hasattr(self, 'style_var') else "Interpret"
-
-                # Get the bio
                 bio_prompt = (
                     f"Create a biography for a professional wrestler. The wrestler's name is {name}. "
                     f"Their gender is {gender}. Description: {description}. "
@@ -549,17 +539,16 @@ class WrestleverseApp:
                 if not bio:
                     logging.error("Failed to generate biography")
                     return
-                style = self.get_style_from_gpt(bio) 
+                style_num = self.get_style_from_gpt(bio) 
                 race = self.get_race_from_gpt(name, f"{description}\n\nBiography: {bio}")
                 picture_name = f"{name.replace(' ', '').lower()}"
                 picture_name = f"{picture_name[:26]}.jpg" 
 
-                # Initialize all required fields with proper defaults
                 worker_row = {
                     "UID": int(uid),
-                    "User": False,  # Will be converted to 0
+                    "User": False,
                     "Regen": self.ensure_byte(0),
-                    "Active": True,  # Will be converted to -1
+                    "Active": True,
                     "Name": name[:30],
                     "Shortname": shortname[:20],
                     "Gender": self.ensure_byte(gender_value),
@@ -569,7 +558,7 @@ class WrestleverseApp:
                     "Outsiderel": self.ensure_byte(0),
                     "Birthday": birth_date,
                     "DebutDate": debut_date,
-                    "DeathDate": "1666-01-01",  # Format as string for Access
+                    "DeathDate": "1666-01-01",
                     "BodyType": self.ensure_byte(random.randint(0, 7)),
                     "WorkerHeight": self.ensure_byte(random.randint(20, 42)),
                     "WorkerWeight": weight,
@@ -579,23 +568,23 @@ class WrestleverseApp:
                     "Nationality": int(1),
                     "Race": self.ensure_byte(race),
                     "Based_In": self.ensure_byte(1),
-                    "LeftBusiness": False,  # Will be converted to 0
-                    "Dead": False,  # Will be converted to 0
-                    "Retired": False,  # Will be converted to 0
-                    "NonWrestler": False,  # Will be converted to 0
+                    "LeftBusiness": False,
+                    "Dead": False,
+                    "Retired": False,
+                    "NonWrestler": False,
                     "Celebridad": self.ensure_byte(0),
-                    "Style": style,
-                    "Freelance": False,  # Will be converted to 0
+                    "Style": style_num,
+                    "Freelance": False,
                     "Loyalty": 0,
-                    "TrueBorn": False,  # Will be converted to 0
-                    "USA": True,  # Will be converted to -1
-                    "Canada": True,  # Will be converted to -1
-                    "Mexico": True,  # Will be converted to -1
-                    "Japan": True,  # Will be converted to -1
-                    "UK": True,  # Will be converted to -1
-                    "Europe": True,  # Will be converted to -1
-                    "Oz": True,  # Will be converted to -1
-                    "India": True,  # Will be converted to -1
+                    "TrueBorn": False,
+                    "USA": True,
+                    "Canada": True,
+                    "Mexico": True,
+                    "Japan": True,
+                    "UK": True,
+                    "Europe": True,
+                    "Oz": True,
+                    "India": True,
                     "Speak_English": int(4),
                     "Speak_Japanese": int(4),
                     "Speak_Spanish": int(4),
@@ -605,20 +594,20 @@ class WrestleverseApp:
                     "Speak_Slavic": int(4),
                     "Speak_Hindi": int(1),
                     "Moveset": int(0),
-                    "Position_Wrestler": True,  # Will be converted to -1
-                    "Position_Occasional": False,  # Will be converted to 0
-                    "Position_Referee": False,  # Will be converted to 0
-                    "Position_Announcer": False,  # Will be converted to 0
-                    "Position_Colour": False,  # Will be converted to 0
-                    "Position_Manager": False,  # Will be converted to 0
-                    "Position_Personality": False,  # Will be converted to 0
-                    "Position_Roadagent": False,  # Will be converted to 0
+                    "Position_Wrestler": True,
+                    "Position_Occasional": False,
+                    "Position_Referee": False,
+                    "Position_Announcer": False,
+                    "Position_Colour": False,
+                    "Position_Manager": False,
+                    "Position_Personality": False,
+                    "Position_Roadagent": False,
                     "Mask": int(0),
                     "Age_Matures": self.ensure_byte(0),
                     "Age_Declines": self.ensure_byte(0),
                     "Age_TalkDeclines": self.ensure_byte(0),
                     "Age_Retires": self.ensure_byte(0),
-                    "OrganicBio": True,  # Will be converted to -1
+                    "OrganicBio": True,
                     "PlasterCaster_Face": self.generate_gimmick(name, description, gender, "face")[:30],
                     "PlasterCaster_FaceBasis": self.ensure_byte(1),
                     "PlasterCaster_Heel": self.generate_gimmick(name, description, gender, "heel")[:30],
@@ -627,30 +616,12 @@ class WrestleverseApp:
                 }
 
                 worker_row_converted = {
-                    key: -1 if isinstance(value, bool) and value else 0 if isinstance(value, bool) else value
+                    key: (-1 if (isinstance(value, bool) and value) else (0 if isinstance(value, bool) else value))
                     for key, value in worker_row.items()
                 }
                 workers_data.append(worker_row_converted)
-
-                
-                # Now get race using both description and bio
-                
-                worker_data = {
-                    "UID": uid,
-                    "name": name,
-                    "shortname": name.split()[0],
-                    "picture": f"{name.replace(' ', '').lower()}.jpg",
-                    "gender": gender,
-                    "gender_id": 1 if gender.lower() == "male" else 2,
-                    "Race": race,
-                    "style": style,
-                    # ... rest of worker_data ...
-                }
-
                 bio_data.append([uid, bio])
-                logging.debug(f"Generated bio for {wrestler_data['name']}")
 
-                # Generate skills
                 if wrestler_data['skill_preset'] == "Interpret":
                     preset_name = self.select_skill_preset_with_chatgpt(
                         wrestler_data['name'],
@@ -663,27 +634,26 @@ class WrestleverseApp:
                 preset = next((p for p in self.skill_presets if p["name"] == preset_name), self.skill_presets[0])
                 skills = self.generate_skills(uid, preset)
                 skills_data.append(skills)
-                logging.debug(f"Generated skills for {wrestler_data['name']} using preset {preset_name}")
 
-                # Generate contract if not freelancer
                 if wrestler_data['company'] != "Freelancer":
-                    logging.debug(f"Creating contract with company: {wrestler_data['company']}")
                     contract = self.generate_contract(wrestler_data, uid, wrestler_data['company'], contract_uid)
-                    contract_data.append(contract)
-                    contract_uid += 1  # Increment for next contract
-                    logging.debug(f"Generated contract for {wrestler_data['name']} with company {wrestler_data['company']}")
+                    if contract:
+                        contract_data.append(contract)
+                        contract_uid += 1
 
                     physical_prompt = (
                         f"Based on this wrestler's details:\n"
                         f"Name: {name}\n"
                         f"Description: {description}\n"
                         f"Gender: {gender}\n"
-                        f"Race: {self.get_race_name(race)}\n"  # Add race to prompt
+                        f"Race: {self.get_race_name(race)}\n"
                         f"Please provide a single sentence describing their physical appearance. "
                         f"Focus on height, build, and distinctive features."
                     )
                     physical_description = self.get_response_from_gpt(physical_prompt)
-                # Add to notes data with picture path and generation flag
+                else:
+                    physical_description = ""
+
                 notes_data.append({
                     "Name": name,
                     "Description": description,
@@ -692,26 +662,31 @@ class WrestleverseApp:
                     "Exclusive": wrestler_data.get('exclusive', 'Random'),
                     "Skill_Preset": wrestler_data.get('skill_preset', 'Default'),
                     "Picture": f"{name.replace(' ', '').lower()}.jpg"[:35],
-
-                    "physical_description":  physical_description,  # Include race in physical description
+                    "physical_description": physical_description,
                     "image_generated": False,
-                    "Race": race  # Also include race for reference
+                    "Race": race
                 })
 
                 uid += 1
 
-            # Save to Access DB if path exists
             if self.access_db_path and os.path.exists(self.access_db_path):
                 logging.debug("Attempting to save to Access database.")
                 try:
+                    conn_str = (
+                        r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
+                        f'DBQ={self.access_db_path};'
+                        'PWD=20YearsOfTEW;'
+                    )
+                    conn = pyodbc.connect(conn_str)
+                    cursor = conn.cursor()
+
+                    # Insert workers
                     for worker_row in workers_data:
-                        # Convert boolean values for Access DB (-1 for True, 0 for False)
                         worker_row_converted = {
-                            key: -1 if isinstance(value, bool) and value else 0 if isinstance(value, bool) else value
+                            key: (-1 if (isinstance(value, bool) and value) else (0 if isinstance(value, bool) else value))
                             for key, value in worker_row.items()
                         }
 
-                        # Ensure text field lengths
                         worker_row_converted["Name"] = worker_row_converted["Name"][:30]
                         worker_row_converted["Shortname"] = worker_row_converted["Shortname"][:20]
                         worker_row_converted["Picture"] = worker_row_converted["Picture"][:35]
@@ -738,93 +713,89 @@ class WrestleverseApp:
                             )
                         """
 
-                        # Convert dates to proper Access format
-
                         debut_date = datetime.datetime(
-                            random.randint(1980, 2023),  # Year between 1980 and 2023
-                            random.randint(1, 12),       # Month
-                            random.randint(1, 28)        # Day (avoiding potential month end issues)
+                            random.randint(1980, 2023),
+                            random.randint(1, 12),
+                            random.randint(1, 28)
                         )
                         debut_age = random.randint(16, 50) 
                         birth_year = debut_date.year - debut_age
                         birth_date = datetime.datetime(
                             birth_year,
-                            random.randint(1, 12),  # Random birth month
-                            random.randint(1, 28)   # Random birth day (avoiding month end issues)
+                            random.randint(1, 12),
+                            random.randint(1, 28)
                         )
                         
-                        death_date = "1666-01-01"  # Format as string for Access
-
-                        # Convert values to match Access data types
+                        death_date = "1666-01-01"
                         worker_values = [
-                            int(worker_row_converted["UID"]),                    # Long Integer
-                            bool(worker_row_converted["User"]),                  # Yes/No
-                            int(worker_row_converted["Regen"]),                  # Byte
-                            bool(worker_row_converted["Active"]),                # Yes/No
-                            str(worker_row_converted["Name"]),                   # Text(30)
-                            str(worker_row_converted["Shortname"]),              # Text(20)
-                            int(worker_row_converted["Gender"]),                 # Byte
-                            int(worker_row_converted["Pronouns"]),               # Byte
-                            int(worker_row_converted["Sexuality"]),              # Byte
-                            int(worker_row_converted["CompetesAgainst"]),        # Byte
-                            int(worker_row_converted["Outsiderel"]),             # Byte
-                            birth_date,                                            # Date/Time
-                            debut_date,                                          # Date/Time
-                            death_date,                                          # Date/Time
-                            int(worker_row_converted["BodyType"]),               # Byte
-                            int(worker_row_converted["WorkerHeight"]),           # Byte
-                            int(worker_row_converted["WorkerWeight"]),           # Integer
-                            int(worker_row_converted["WorkerMinWeight"]),        # Integer
-                            int(worker_row_converted["WorkerMaxWeight"]),        # Integer
-                            str(worker_row_converted["Picture"]),                # Text(35)
-                            int(worker_row_converted["Nationality"]),            # Integer
-                            int(worker_row_converted["Race"]),                   # Byte
-                            int(worker_row_converted["Based_In"]),               # Byte
-                            bool(worker_row_converted["LeftBusiness"]),          # Yes/No
-                            bool(worker_row_converted["Dead"]),                  # Yes/No
-                            bool(worker_row_converted["Retired"]),               # Yes/No
-                            bool(worker_row_converted["NonWrestler"]),           # Yes/No
-                            int(worker_row_converted["Celebridad"]),             # Byte
-                            int(worker_row_converted["Style"]),                  # Byte
-                            bool(worker_row_converted["Freelance"]),             # Yes/No
-                            int(worker_row_converted["Loyalty"]),                # Long Integer
-                            bool(worker_row_converted["TrueBorn"]),              # Yes/No
-                            bool(worker_row_converted["USA"]),                   # Yes/No
-                            bool(worker_row_converted["Canada"]),                # Yes/No
-                            bool(worker_row_converted["Mexico"]),                # Yes/No
-                            bool(worker_row_converted["Japan"]),                 # Yes/No
-                            bool(worker_row_converted["UK"]),                    # Yes/No
-                            bool(worker_row_converted["Europe"]),                # Yes/No
-                            bool(worker_row_converted["Oz"]),                    # Yes/No
-                            bool(worker_row_converted["India"]),                 # Yes/No
-                            int(worker_row_converted["Speak_English"]),          # Integer
-                            int(worker_row_converted["Speak_Japanese"]),         # Integer
-                            int(worker_row_converted["Speak_Spanish"]),          # Integer
-                            int(worker_row_converted["Speak_French"]),           # Integer
-                            int(worker_row_converted["Speak_Germanic"]),         # Integer
-                            int(worker_row_converted["Speak_Med"]),              # Integer
-                            int(worker_row_converted["Speak_Slavic"]),           # Integer
-                            int(worker_row_converted["Speak_Hindi"]),            # Integer
-                            int(worker_row_converted["Moveset"]),                # Long Integer
-                            bool(worker_row_converted["Position_Wrestler"]),     # Yes/No
-                            bool(worker_row_converted["Position_Occasional"]),   # Yes/No
-                            bool(worker_row_converted["Position_Referee"]),      # Yes/No
-                            bool(worker_row_converted["Position_Announcer"]),    # Yes/No
-                            bool(worker_row_converted["Position_Colour"]),       # Yes/No
-                            bool(worker_row_converted["Position_Manager"]),      # Yes/No
-                            bool(worker_row_converted["Position_Personality"]),  # Yes/No
-                            bool(worker_row_converted["Position_Roadagent"]),    # Yes/No
-                            int(worker_row_converted["Mask"]),                   # Integer
-                            int(worker_row_converted["Age_Matures"]),            # Byte
-                            int(worker_row_converted["Age_Declines"]),           # Byte
-                            int(worker_row_converted["Age_TalkDeclines"]),       # Byte
-                            int(worker_row_converted["Age_Retires"]),            # Byte
-                            bool(worker_row_converted["OrganicBio"]),            # Yes/No
-                            str(worker_row_converted["PlasterCaster_Face"]),     # Text(30)
-                            int(worker_row_converted["PlasterCaster_FaceBasis"]), # Byte
-                            str(worker_row_converted["PlasterCaster_Heel"]),     # Text(30)
-                            int(worker_row_converted["PlasterCaster_HeelBasis"]), # Byte
-                            int(worker_row_converted["CareerGoal"])              # Byte
+                            int(worker_row_converted["UID"]),
+                            bool(worker_row_converted["User"]),
+                            int(worker_row_converted["Regen"]),
+                            bool(worker_row_converted["Active"]),
+                            str(worker_row_converted["Name"]),
+                            str(worker_row_converted["Shortname"]),
+                            int(worker_row_converted["Gender"]),
+                            int(worker_row_converted["Pronouns"]),
+                            int(worker_row_converted["Sexuality"]),
+                            int(worker_row_converted["CompetesAgainst"]),
+                            int(worker_row_converted["Outsiderel"]),
+                            birth_date,
+                            debut_date,
+                            death_date,
+                            int(worker_row_converted["BodyType"]),
+                            int(worker_row_converted["WorkerHeight"]),
+                            int(worker_row_converted["WorkerWeight"]),
+                            int(worker_row_converted["WorkerMinWeight"]),
+                            int(worker_row_converted["WorkerMaxWeight"]),
+                            str(worker_row_converted["Picture"]),
+                            int(worker_row_converted["Nationality"]),
+                            int(worker_row_converted["Race"]),
+                            int(worker_row_converted["Based_In"]),
+                            bool(worker_row_converted["LeftBusiness"]),
+                            bool(worker_row_converted["Dead"]),
+                            bool(worker_row_converted["Retired"]),
+                            bool(worker_row_converted["NonWrestler"]),
+                            int(worker_row_converted["Celebridad"]),
+                            int(worker_row_converted["Style"]),
+                            bool(worker_row_converted["Freelance"]),
+                            int(worker_row_converted["Loyalty"]),
+                            bool(worker_row_converted["TrueBorn"]),
+                            bool(worker_row_converted["USA"]),
+                            bool(worker_row_converted["Canada"]),
+                            bool(worker_row_converted["Mexico"]),
+                            bool(worker_row_converted["Japan"]),
+                            bool(worker_row_converted["UK"]),
+                            bool(worker_row_converted["Europe"]),
+                            bool(worker_row_converted["Oz"]),
+                            bool(worker_row_converted["India"]),
+                            int(worker_row_converted["Speak_English"]),
+                            int(worker_row_converted["Speak_Japanese"]),
+                            int(worker_row_converted["Speak_Spanish"]),
+                            int(worker_row_converted["Speak_French"]),
+                            int(worker_row_converted["Speak_Germanic"]),
+                            int(worker_row_converted["Speak_Med"]),
+                            int(worker_row_converted["Speak_Slavic"]),
+                            int(worker_row_converted["Speak_Hindi"]),
+                            int(worker_row_converted["Moveset"]),
+                            bool(worker_row_converted["Position_Wrestler"]),
+                            bool(worker_row_converted["Position_Occasional"]),
+                            bool(worker_row_converted["Position_Referee"]),
+                            bool(worker_row_converted["Position_Announcer"]),
+                            bool(worker_row_converted["Position_Colour"]),
+                            bool(worker_row_converted["Position_Manager"]),
+                            bool(worker_row_converted["Position_Personality"]),
+                            bool(worker_row_converted["Position_Roadagent"]),
+                            int(worker_row_converted["Mask"]),
+                            int(worker_row_converted["Age_Matures"]),
+                            int(worker_row_converted["Age_Declines"]),
+                            int(worker_row_converted["Age_TalkDeclines"]),
+                            int(worker_row_converted["Age_Retires"]),
+                            bool(worker_row_converted["OrganicBio"]),
+                            str(worker_row_converted["PlasterCaster_Face"]),
+                            int(worker_row_converted["PlasterCaster_FaceBasis"]),
+                            str(worker_row_converted["PlasterCaster_Heel"]),
+                            int(worker_row_converted["PlasterCaster_HeelBasis"]),
+                            int(worker_row_converted["CareerGoal"])
                         ]
 
                         cursor.execute(sql_insert_worker, worker_values)
@@ -932,92 +903,88 @@ class WrestleverseApp:
                                 ?, ?, ?, ?
                             )
                         """
-                        # Let's count and verify our values match exactly
                         contract_values = [
-                            contract["UID"],                    # 1
-                            contract["FedUID"],                 # 2
-                            contract["WorkerUID"],              # 3
-                            contract["Name"],                   # 4
-                            contract["Shortname"],              # 5
-                            contract["Picture"],                # 6
-                            contract["CompetesIn"],             # 7
-                            contract["Face"],                   # 8
-                            contract["Division"],               # 9
-                            contract["Manager"],                # 10
-                            contract["Moveset"],                # 11
-                            contract["WrittenContract"],        # 12
-                            contract["ExclusiveContract"],      # 13
-                            contract["TouringContract"],        # 14
-                            contract["PaidMonthly"],            # 15
-                            contract["OnLoan"],                 # 16
-                            contract["Developmental"],          # 17
-                            contract["PrimaryUsage"],           # 18
-                            contract["SecondaryUsage"],         # 19
-                            contract["ExpectedShows"],          # 20
-                            contract["BonusAmount"],            # 21
-                            contract["BonusType"],              # 22
-                            contract["Creative"],               # 23
-                            contract["HiringVeto"],             # 24
-                            contract["WageMatch"],              # 25
-                            contract["IronClad"],               # 26
-                            contract["ContractBeganDate"],      # 27
-                            contract["Daysleft"],               # 28
-                            contract["Dateslength"],            # 29
-                            contract["DatesLeft"],              # 30
-                            contract["ContractDebutDate"],      # 31
-                            contract["Amount"],                 # 32
-                            contract["Downside"],               # 33
-                            contract["Brand"],                  # 34
-                            contract["Mask"],                   # 35
-                            contract["ContractMomentum"],       # 36
-                            contract["Last_Turn"],              # 37
-                            contract["Travel"],                 # 38
-                            contract["Position_Wrestler"],      # 39
-                            contract["Position_Occasional"],    # 40
-                            contract["Position_Referee"],       # 41
-                            contract["Position_Announcer"],     # 42
-                            contract["Position_Colour"],        # 43
-                            contract["Position_Manager"],       # 44
-                            contract["Position_Personality"],   # 45
-                            contract["Position_Roadagent"],     # 46
-                            contract["Merch"],                  # 47
-                            contract["PlasterCaster_Gimmick"],  # 48
-                            contract["PlasterCaster_Rating"],   # 49
-                            contract["PlasterCaster_Lifespan"], # 50
-                            contract["PlasterCaster_Byte1"],    # 51
-                            contract["PlasterCaster_Byte2"],    # 52
-                            contract["PlasterCaster_Byte3"],    # 53
-                            contract["PlasterCaster_Byte4"],    # 54
-                            contract["PlasterCaster_Byte5"],    # 55
-                            contract["PlasterCaster_Byte6"],    # 56
-                            contract["PlasterCaster_Bool1"],    # 57
-                            contract["PlasterCaster_Bool2"],    # 58
-                            contract["PlasterCaster_Bool3"],    # 59
-                            contract["PlasterCaster_Bool4"],    # 60
-                            contract["PlasterCaster_Bool5"],    # 61
-                            contract["PlasterCaster_Bool6"],    # 62
-                            contract["PlasterCaster_Bool7"],    # 63
-                            contract["PlasterCaster_Bool8"],    # 64
-                            contract["PlasterCaster_Bool9"],    # 65
-                            contract["PlasterCaster_Bool10"],   # 66
-                            contract["PlasterCaster_Bool11"],   # 67
-                            contract["PlasterCaster_Bool12"],   # 68
-                            contract["PlasterCaster_Bool13"],   # 69
-                            contract["PlasterCaster_Bool14"],   # 70
-                            contract["PlasterCaster_Bool15"],   # 71
-                            contract["PlasterCaster_Bool16"],   # 72
-                            contract["PlasterCaster_Bool17"],   # 73
-                            contract["PlasterCaster_Bool18"],   # 74
-                            contract["PlasterCaster_Bool19"],   # 75
-                            contract["PlasterCaster_Bool20"],   # 76
-                            contract["PlasterCaster_Bool21"],   # 77
-                            contract["PlasterCaster_Bool22"],   # 78
-                            contract["PlasterCaster_Bool23"],   # 79
-                            contract["PlasterCaster_Bool24"],   # 80
-                            contract["PlasterCaster_Bool25"]    # 81
+                            contract["UID"],
+                            contract["FedUID"],
+                            contract["WorkerUID"],
+                            contract["Name"],
+                            contract["Shortname"],
+                            contract["Picture"],
+                            contract["CompetesIn"],
+                            contract["Face"],
+                            contract["Division"],
+                            contract["Manager"],
+                            contract["Moveset"],
+                            contract["WrittenContract"],
+                            contract["ExclusiveContract"],
+                            contract["TouringContract"],
+                            contract["PaidMonthly"],
+                            contract["OnLoan"],
+                            contract["Developmental"],
+                            contract["PrimaryUsage"],
+                            contract["SecondaryUsage"],
+                            contract["ExpectedShows"],
+                            contract["BonusAmount"],
+                            contract["BonusType"],
+                            contract["Creative"],
+                            contract["HiringVeto"],
+                            contract["WageMatch"],
+                            contract["IronClad"],
+                            contract["ContractBeganDate"],
+                            contract["Daysleft"],
+                            contract["Dateslength"],
+                            contract["DatesLeft"],
+                            contract["ContractDebutDate"],
+                            contract["Amount"],
+                            contract["Downside"],
+                            contract["Brand"],
+                            contract["Mask"],
+                            contract["ContractMomentum"],
+                            contract["Last_Turn"],
+                            contract["Travel"],
+                            contract["Position_Wrestler"],
+                            contract["Position_Occasional"],
+                            contract["Position_Referee"],
+                            contract["Position_Announcer"],
+                            contract["Position_Colour"],
+                            contract["Position_Manager"],
+                            contract["Position_Personality"],
+                            contract["Position_Roadagent"],
+                            contract["Merch"],
+                            contract["PlasterCaster_Gimmick"],
+                            contract["PlasterCaster_Rating"],
+                            contract["PlasterCaster_Lifespan"],
+                            contract["PlasterCaster_Byte1"],
+                            contract["PlasterCaster_Byte2"],
+                            contract["PlasterCaster_Byte3"],
+                            contract["PlasterCaster_Byte4"],
+                            contract["PlasterCaster_Byte5"],
+                            contract["PlasterCaster_Byte6"]
                         ]
+                        # Add PlasterCaster_Bools
+                        for i in range(1, 26):
+                            contract_values.append(contract[f"PlasterCaster_Bool{i}"])
+
                         logging.debug(f"Executing Contract SQL with values: {contract_values}")
                         cursor.execute(sql_insert_contract, contract_values)
+
+                    # Now generate and insert popularity (tblWorkerOver)
+                    # After workers are inserted, we query GPT for popularity categories per region
+                    for worker_row in workers_data:
+                        worker_uid = worker_row["UID"]
+                        # Get popularity categories from GPT
+                        popularity_categories = self.get_region_popularity_from_gpt(name, bio)
+                        # If fail, popularity_categories will be "Unknown" everywhere
+                        popularity_values = self.convert_popularity_categories_to_values(popularity_categories)
+                        
+                        # Insert into tblWorkerOver
+                        # tblWorkerOver: UID, Over1 ... Over57
+                        columns = ["WorkerUID"] + [f"Over{i}" for i in range(1,58)]
+                        placeholders = ", ".join(["?"] * 58)
+                        sql_insert_over = f"INSERT INTO tblWorkerOver ({', '.join(columns)}) VALUES ({placeholders})"
+
+                        over_values = [worker_uid] + popularity_values
+                        cursor.execute(sql_insert_over, over_values)
 
                     conn.commit()
                     logging.debug("Successfully committed all changes to Access database.")
@@ -1032,7 +999,6 @@ class WrestleverseApp:
                 logging.debug("Attempting to save data to Excel file.")
                 excel_path = "wrestleverse_workers.xlsx"
                 
-                # Check if file exists and read existing data
                 if os.path.exists(excel_path):
                     existing_workers = pd.read_excel(excel_path, sheet_name="Workers")
                     existing_bios = pd.read_excel(excel_path, sheet_name="Bios")
@@ -1040,32 +1006,27 @@ class WrestleverseApp:
                     existing_contracts = pd.read_excel(excel_path, sheet_name="Contracts")
                     existing_notes = pd.read_excel(excel_path, sheet_name="Notes")
                     
-                    # Convert new data to DataFrames
                     new_workers = pd.DataFrame(workers_data)
                     new_bios = pd.DataFrame(bio_data, columns=["UID", "Bio"])
                     new_skills = pd.DataFrame(skills_data)
                     new_contracts = pd.DataFrame(contract_data)
                     new_notes = pd.DataFrame(notes_data)
                     
-                    # Concatenate existing and new data
                     workers_df = pd.concat([existing_workers, new_workers], ignore_index=True)
                     bio_df = pd.concat([existing_bios, new_bios], ignore_index=True)
                     skills_df = pd.concat([existing_skills, new_skills], ignore_index=True)
                     contracts_df = pd.concat([existing_contracts, new_contracts], ignore_index=True)
                     notes_df = pd.concat([existing_notes, new_notes], ignore_index=True)
                 else:
-                    # If file doesn't exist, create new DataFrames
                     workers_df = pd.DataFrame(workers_data)
                     bio_df = pd.DataFrame(bio_data, columns=["UID", "Bio"])
                     skills_df = pd.DataFrame(skills_data)
                     contracts_df = pd.DataFrame(contract_data)
                     notes_df = pd.DataFrame(notes_data)
                 
-                # Explicitly ensure physical_description is included in notes_df
                 if 'physical_description' not in notes_df.columns:
                     notes_df['physical_description'] = ''
                 
-                # Save to Excel
                 with pd.ExcelWriter(excel_path) as writer:
                     workers_df.to_excel(writer, sheet_name="Workers", index=False)
                     bio_df.to_excel(writer, sheet_name="Bios", index=False)
@@ -1078,36 +1039,27 @@ class WrestleverseApp:
             except Exception as e:
                 logging.error(f"Error saving Excel file: {e}", exc_info=True)
                 messagebox.showerror("Error", f"Could not save Excel file: {str(e)}")
-                uid = result[0] + 1 if result[0] else 1
-                
-                # Get next contract UID
-                cursor.execute("SELECT MAX(UID) FROM tblContract")
-                result = cursor.fetchone()
-                contract_uid = result[0] + 1 if result[0] else 1
 
-            # Inside the try block, just before saving to Excel:
             for note in notes_data:
                 try:
-                    # Get physical description from GPT
                     physical_prompt = (
                         f"Based on this wrestler's details:\n"
                         f"Name: {note['Name']}\n"
                         f"Description: {note['Description']}\n"
                         f"Gender: {note['Gender']}\n"
-                        f"Race: {self.get_race_name(note.get('Race', 0))}\n"  # Add race to prompt
+                        f"Race: {self.get_race_name(note.get('Race', 0))}\n"
                         f"Please provide a single sentence describing their physical appearance. "
                         f"Focus on height, build, and distinctive features."
                     )
                     physical_description = self.get_response_from_gpt(physical_prompt)
-                    # Combine race with the generated description
                     note['physical_description'] = f"Race: {self.get_race_name(note.get('Race', 0))}. {physical_description}"
                     logging.debug(f"Generated physical description for {note['Name']}: {note['physical_description']}")
                 except Exception as e:
                     logging.error(f"Error generating physical description: {e}")
                     note['physical_description'] = ""
 
-            # Save to Excel
-            
+            self.status_label.config(text="Status: Generation complete!")
+            self.root.update_idletasks()
 
         except Exception as e:
             logging.error(f"Unhandled error in generate_wrestlers: {e}", exc_info=True)
@@ -1115,9 +1067,110 @@ class WrestleverseApp:
             logging.error(error_message, exc_info=True)
             self.status_label.config(text=f"Status: Error - {str(e)}")
             messagebox.showerror("Error", error_message)
-        finally:
-            self.status_label.config(text="Status: Generation complete!")
-            self.root.update_idletasks()
+
+    def get_region_popularity_from_gpt(self, name, bio):
+        # We'll ask GPT for a JSON response with popularity categories for each region.
+        # If it fails, we'll return all Unknown.
+        prompt = (
+            f"Provide popularity categories for a wrestler named {name} with the bio {bio} regions in JSON format:\n\n"
+            "Regions:\n"
+            "America\nCanada\nMexico\nBritish Isles\nJapan\nEurope\nOceania\nIndia\n\n"
+            "The categories are: Unknown, Insignificant, Indie Popularity, Recognized, Well Known, Very Popular, Superstar.\n"
+            "Return JSON only, and only the pairing of region to category, influenced from the name and bio. No other text Example:\n"
+            "{\n"
+            "  \"America\": \"Well Known\",\n"
+            "  \"Canada\": \"Insignificant\",\n"
+            "  \"Mexico\": \"Superstar\",\n"
+            "  \"British Isles\": \"Unknown\",\n"
+            "  \"Japan\": \"Very Popular\",\n"
+            "  \"Europe\": \"Recognized\",\n"
+            "  \"Oceania\": \"Indie Popularity\",\n"
+            "  \"India\": \"Insignificant\"\n"
+            "}"
+        )
+
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            content = response.choices[0].message.content.strip()
+            popularity_data = json.loads(content)
+            # Validate keys
+            required_keys = ["America","Canada","Mexico","British Isles","Japan","Europe","Oceania","India"]
+            if all(key in popularity_data for key in required_keys):
+                logging.debug(f"Popularity data: {popularity_data}")
+                return popularity_data
+            else:
+                return {r: "Unknown" for r in required_keys}
+        except Exception as e:
+            logging.error(f"Error getting popularity from GPT: {e}", exc_info=True)
+            return {
+                "America": "Unknown",
+                "Canada": "Unknown",
+                "Mexico": "Unknown",
+                "British Isles": "Unknown",
+                "Japan": "Unknown",
+                "Europe": "Unknown",
+                "Oceania": "Unknown",
+                "India": "Unknown"
+            }
+
+    def convert_popularity_categories_to_values(self, categories):
+        # categories: dict of region_name: category_name
+        # Regions mapping to Over columns:
+        # Over1-Over11: America
+        # Over12-Over18: Canada
+        # Over19-Over24: Mexico
+        # Over25-Over30: British Isles
+        # Over31-Over38: Japan
+        # Over39-46: Europe
+        # Over47-53: Oceania
+        # Over54-57: India
+
+        # Mapping function category -> min_max
+        def range_for_category(cat):
+            if cat == "Unknown":
+                return (0, 0)
+            elif cat == "Insignificant":
+                return (0, 15)
+            elif cat == "Indie Popularity":
+                return (10, 35)
+            elif cat == "Recognized":
+                return (20, 49)
+            elif cat == "Well Known":
+                return (35, 65)
+            elif cat == "Very Popular":
+                return (50, 85)
+            elif cat == "Superstar":
+                return (75, 99)
+            else:
+                return (0,0) # default if something goes wrong
+
+        def assign_values_for_region(region_name, count):
+            cat = categories.get(region_name, "Unknown")
+            min_val, max_val = range_for_category(cat)
+            return [random.randint(min_val, max_val) for _ in range(count)]
+
+        values = []
+        # America: 11 columns
+        values += assign_values_for_region("America", 11)
+        # Canada: 7 columns
+        values += assign_values_for_region("Canada", 7)
+        # Mexico: 6 columns
+        values += assign_values_for_region("Mexico", 6)
+        # British Isles: 6 columns
+        values += assign_values_for_region("British Isles", 6)
+        # Japan: 8 columns
+        values += assign_values_for_region("Japan", 8)
+        # Europe: 8 columns
+        values += assign_values_for_region("Europe", 8)
+        # Oceania: 7 columns
+        values += assign_values_for_region("Oceania", 7)
+        # India: 4 columns
+        values += assign_values_for_region("India", 4)
+
+        return values
 
     def open_company_generator(self):
         for widget in self.root.winfo_children():
@@ -1134,65 +1187,6 @@ class WrestleverseApp:
         generate_btn.pack(side="bottom", pady=10)
         back_btn = ttk.Button(self.root, text="Back", command=self.setup_main_menu)
         back_btn.pack(side="bottom", pady=10)
-
-    def add_company_form(self):
-        company_frame = ttk.Frame(self.companies_frame, relief="ridge", borderwidth=2)
-        company_frame.pack(fill="x", pady=5)
-        name_label = ttk.Label(company_frame, text="Name:")
-        name_label.grid(row=0, column=0, padx=5, pady=5)
-        name_entry = ttk.Entry(company_frame)
-        name_entry.grid(row=0, column=1, padx=5, pady=5)
-        description_label = ttk.Label(company_frame, text="Description:")
-        description_label.grid(row=1, column=0, padx=5, pady=5)
-        description_entry = ttk.Entry(company_frame, width=40)
-        description_entry.grid(row=1, column=1, columnspan=3, padx=5, pady=5)
-        size_label = ttk.Label(company_frame, text="Size:")
-        size_label.grid(row=2, column=0, padx=5, pady=5)
-        size_var = tk.StringVar(value="Medium")
-        size_dropdown = ttk.Combobox(company_frame, textvariable=size_var, values=["Tiny", "Small", "Medium", "Large"])
-        size_dropdown.grid(row=2, column=1, padx=5, pady=5)
-        remove_btn = ttk.Button(company_frame, text="❌", command=lambda: self.remove_company_form(company_frame))
-        remove_btn.grid(row=0, column=4, padx=5, pady=5)
-        self.companies.append({
-            "frame": company_frame,
-            "name": name_entry,
-            "description": description_entry,
-            "size": size_var
-        })
-
-    def remove_company_form(self, company_frame):
-        company_frame.destroy()
-        self.companies = [company for company in self.companies if company["frame"] != company_frame]
-
-
-
-    def generate_company_name(self, description=None, size=None):
-        prompt = "Generate a name for a professional wrestling company."
-        if description:
-            prompt += f" The company's style or theme is: {description}."
-        if size:
-            prompt += f" The company is of {size.lower()} size."
-        response = self.client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "user", "content": prompt}
-            ]
-        )
-        return response.choices[0].message.content.strip()
-
-    def generate_company_description(self, name=None, size=None):
-        prompt = "Generate a description for a professional wrestling company."
-        if name:
-            prompt += f" The company's name is {name}."
-        if size:
-            prompt += f" The company is of {size.lower()} size."
-        response = self.client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "user", "content": prompt}
-            ]
-        )
-        return response.choices[0].message.content.strip()
 
     def ensure_byte(self, value):
         return max(0, min(255, int(value)))
@@ -1231,7 +1225,7 @@ class WrestleverseApp:
         return response.choices[0].message.content.strip()
 
     def generate_gimmick(self, name, description, gender, alignment):
-        prompt = f"Generate a wrestling gimmick for a {alignment} wrestler. Return only a couple of words for the gimmick and not other text. For example, if the wrestler was big and daunting, their gimmick might be Mountain. A sassy wrestler could be Valley Girl. These are just examples."
+        prompt = f"Generate a wrestling gimmick for a {alignment} wrestler. Return only a couple of words for the gimmick and not other text."
         if name:
             prompt += f" The wrestler's name is {name}."
         if description:
@@ -1302,28 +1296,24 @@ class WrestleverseApp:
         settings_title = ttk.Label(self.root, text="Settings", font=("Helvetica", 16))
         settings_title.pack(pady=10)
         
-        # API Key
         api_key_label = ttk.Label(self.root, text="ChatGPT API Key:")
         api_key_label.pack(pady=5)
         self.api_key_var = tk.StringVar(value=self.api_key)
         api_key_entry = ttk.Entry(self.root, textvariable=self.api_key_var, width=50)
         api_key_entry.pack(pady=5)
         
-        # UID Start
         uid_start_label = ttk.Label(self.root, text="UID Start:")
         uid_start_label.pack(pady=5)
         self.uid_start_var = tk.IntVar(value=self.uid_start)
         uid_start_entry = ttk.Entry(self.root, textvariable=self.uid_start_var, width=10)
         uid_start_entry.pack(pady=5)
         
-        # Bio Prompt
         bio_prompt_label = ttk.Label(self.root, text="Bio Prompt:")
         bio_prompt_label.pack(pady=5)
         self.bio_prompt_var = tk.StringVar(value=self.bio_prompt)
         bio_prompt_entry = ttk.Entry(self.root, textvariable=self.bio_prompt_var, width=50)
         bio_prompt_entry.pack(pady=5)
         
-        # Access DB Path
         access_db_label = ttk.Label(self.root, text="Access Database Path (Optional):")
         access_db_label.pack(pady=5)
         self.access_db_var = tk.StringVar(value=self.access_db_path)
@@ -1332,7 +1322,6 @@ class WrestleverseApp:
         browse_db_btn = ttk.Button(self.root, text="Browse", command=self.browse_access_db)
         browse_db_btn.pack(pady=5)
         
-        # Pictures Path
         pictures_label = ttk.Label(self.root, text="Pictures Path (Optional):")
         pictures_label.pack(pady=5)
         self.pictures_var = tk.StringVar(value=self.pictures_path)
@@ -1341,7 +1330,6 @@ class WrestleverseApp:
         browse_pics_btn = ttk.Button(self.root, text="Browse", command=self.browse_pictures_path)
         browse_pics_btn.pack(pady=5)
         
-        # Save Button
         save_btn = ttk.Button(self.root, text="Save", command=self.save_settings)
         save_btn.pack(pady=10)
         back_btn = ttk.Button(self.root, text="Back", command=self.setup_main_menu)
@@ -1453,8 +1441,8 @@ class WrestleverseApp:
             self.skill_entries[skill] = {"min": min_var, "max": max_var}
         save_btn = ttk.Button(self.preset_window, text="Save Preset", command=self.save_new_preset)
         save_btn.pack(pady=10)
+
     def get_style_from_gpt(self, bio):
-        """Determine wrestling style number based on bio text"""
         prompt = (
             "Based on this wrestler's biography, select the most appropriate wrestling style number from this list:\n"
             "1-Regular\n2-Entertainer\n3-Comedy\n4-Powerhouse\n5-Impactful\n6-Striker\n"
@@ -1462,7 +1450,7 @@ class WrestleverseApp:
             "12-Technician\n13-Technician Flyer\n14-Technician Striker\n15-Daredevil\n"
             "16-MMA Crossover\n17-Never Wrestles\n\n"
             f"Biography: {bio}\n\n"
-            "Respond with ONLY the number (1-17) that best matches their style. For example, if you choose striker you'd only return '6' and nothing else."
+            "Respond with ONLY the number (1-17)."
         )
         
         try:
@@ -1471,23 +1459,17 @@ class WrestleverseApp:
                 messages=[{"role": "user", "content": prompt}]
             )
             style_text = response.choices[0].message.content.strip()
-            logging.debug(f"Style text: {style_text}")
-            # Try to convert to integer
             try:
                 style = int(style_text)
-                # Validate range
                 if 1 <= style <= 17:
                     return style
             except ValueError:
                 pass
-            
-            # If we get here, either the conversion failed or number was out of range
             return 1
-            
         except Exception as e:
             logging.error(f"Error getting style from GPT: {e}")
             return 1
-    
+
     def save_new_preset(self):
         preset_name = self.preset_name_var.get().strip()
         if not preset_name:
@@ -1508,7 +1490,7 @@ class WrestleverseApp:
                     return
                 preset_skills[skill] = {"min": min_value, "max": max_value}
             except ValueError:
-                messagebox.showerror("Error", f"Invalid input for skill {skill}. Please enter integers between 0 and 100.")
+                messagebox.showerror("Error", f"Invalid input for skill {skill}.")
                 return
         new_preset = {
             "name": preset_name,
@@ -1583,7 +1565,7 @@ class WrestleverseApp:
                     return
                 preset_skills[skill] = {"min": min_value, "max": max_value}
             except ValueError:
-                messagebox.showerror("Error", f"Invalid input for skill {skill}. Please enter integers between 0 and 100.")
+                messagebox.showerror("Error", f"Invalid input for skill {skill}.")
                 return
         self.skill_presets[index]["name"] = preset_name
         self.skill_presets[index]["skills"] = preset_skills
@@ -1664,7 +1646,6 @@ class WrestleverseApp:
         }
 
     def get_companies(self):
-        """Get list of companies from the database"""
         if self.access_db_path and os.path.exists(self.access_db_path):
             try:
                 conn_str = (
@@ -1679,10 +1660,7 @@ class WrestleverseApp:
                 companies = cursor.fetchall()
                 conn.close()
                 
-                # Log what we got from the database
                 logging.debug(f"Retrieved companies from database: {companies}")
-                
-                # Convert to list of tuples and ensure UIDs are integers
                 company_list = [(int(company[0]), company[1]) for company in companies]
                 logging.debug(f"Converted company list: {company_list}")
                 
@@ -1693,10 +1671,8 @@ class WrestleverseApp:
         return []
 
     def generate_contract(self, worker_data, worker_uid, company_choice, contract_uid):
-        """Generate contract data for a worker"""
         logging.debug(f"Generating contract for worker {worker_uid} with company choice: '{company_choice}'")
         
-        # Determine company UID
         companies = self.get_companies()
         fed_uid = None
         
@@ -1709,9 +1685,8 @@ class WrestleverseApp:
                 logging.debug("Freelancer selected - no contract needed")
                 return None
             else:
-                # Find exact matching company by name
                 for company in companies:
-                    if company[1] == company_choice:  # Exact match
+                    if company[1] == company_choice:
                         fed_uid = company[0]
                         logging.debug(f"Found exact matching company: {company[1]} (UID: {fed_uid})")
                         break
@@ -1720,8 +1695,7 @@ class WrestleverseApp:
                     logging.error(f"No matching company found for: {company_choice}")
                     return None
 
-        # Determine face/heel alignment
-        alignment_prompt = f"For a wrestler named {worker_data['name']}, should they be a face (good guy) or heel (bad guy)? Answer with only the word 'face' or 'heel'."
+        alignment_prompt = f"For a wrestler named {worker_data['name']}, should they be face or heel? Answer with 'face' or 'heel'."
         try:
             response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
@@ -1733,26 +1707,20 @@ class WrestleverseApp:
             logging.error(f"Error getting alignment from GPT: {e}", exc_info=True)
             is_face = random.choice([True, False])
 
-        # Generate contract dates
         try:
-            # Contract began date (between 2010 and 2022)
             contract_began = datetime.datetime(
                 random.randint(2010, 2022),
                 random.randint(1, 12),
-                random.randint(1, 28)  # Using 28 to avoid month end issues
+                random.randint(1, 28)
             )
             
-            # Contract debut date (using 1900 instead of 1666)
             contract_debut = datetime.datetime(1900, 1, 1)
             
-            logging.debug(f"Generated dates - Began: {contract_began}, Debut: {contract_debut}")
         except ValueError as e:
             logging.error(f"Error generating dates: {e}")
-            # Fallback dates if there's an error
             contract_began = datetime.datetime(2020, 1, 1)
             contract_debut = datetime.datetime(1900, 1, 1)
 
-        # Determine exclusive contract status
         exclusive_choice = worker_data.get('exclusive', 'Random')
         is_exclusive = random.choice([True, False]) if exclusive_choice == 'Random' else exclusive_choice == 'Yes'
 
@@ -1809,23 +1777,20 @@ class WrestleverseApp:
             "PlasterCaster_Lifespan": random.randint(0, 4)
         }
 
-        # Add all PlasterCaster_Byte fields (1-6)
         for i in range(1, 7):
             contract_data[f"PlasterCaster_Byte{i}"] = 0
 
-        # Add all PlasterCaster_Bool fields (1-25)
         for i in range(1, 26):
             contract_data[f"PlasterCaster_Bool{i}"] = False
 
         return contract_data
 
     def get_race_from_gpt(self, name, description):
-        """Get race index from GPT based on name and description"""
         prompt = (
             f"Based on the name '{name}' and description '{description}', select the most appropriate "
             "race from this list and respond with ONLY the corresponding number:\n"
             "1: White\n2: Black\n3: Asian\n4: Hispanic\n5: American Indian\n"
-            "6: Middle Eastern\n7: South Asian\n8: Pacific\n9: Other\n\n"
+            "6: Middle Eastern\n7: South Asian\n8: Pacific\n9: Other\n"
             "Respond with only the number."
         )
         
@@ -1835,77 +1800,18 @@ class WrestleverseApp:
                 messages=[{"role": "user", "content": prompt}]
             )
             race_str = response.choices[0].message.content.strip()
-            logging.info(f"Race response from GPT: {race_str}")
-            # Try to convert to int and validate range
             try:
                 race = int(race_str)
                 if 1 <= race <= 9:
                     return race
             except ValueError:
                 pass
-            
-            # If we get here, either conversion failed or number was out of range
-            logging.warning(f"Invalid race response from GPT: {race_str}, defaulting to 9")
             return 9
-            
         except Exception as e:
             logging.error(f"Error getting race from GPT: {e}", exc_info=True)
             return 9
 
-    def save_to_access_db(self, worker_data, bio_data, skills_data, contract_data):
-        """Save generated data to Access database"""
-        logging.debug("Attempting to save to Access database.")
-        try:
-            conn_str = (
-                r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
-                f'DBQ={self.access_db_path};'
-                'PWD=20YearsOfTEW;'
-            )
-            conn = pyodbc.connect(conn_str)
-            cursor = conn.cursor()
-
-            # Insert worker data
-            worker_sql = """
-                INSERT INTO tblWorker (
-                    UID, Name, ShortName, Picture, Gender, Race, Nationality, Height, Weight, 
-                    BirthDate, DebutDate, Face_Gimmick, Heel_Gimmick, Style
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """
-            worker_values = [
-                worker_data['UID'], worker_data['name'], worker_data['shortname'], 
-                worker_data['picture'], worker_data['gender_id'], worker_data['Race'], 
-                worker_data['nationality'], worker_data['height'], worker_data['weight'],
-                worker_data['Birthday'], worker_data['DebutDate'], 
-                worker_data['face_gimmick'], worker_data['heel_gimmick'], 
-                worker_data['style']
-            ]
-            cursor.execute(worker_sql, worker_values)
-            
-            # ... rest of database saving code ...
-
-            conn.commit()
-            logging.info(f"Created wrestler: {worker_data['name']} (UID: {worker_data['UID']}) - " 
-                        f"Race: {worker_data['Race']}, Nationality: {worker_data['nationality']}")
-            
-            # Print a summary of the created wrestler
-            print(f"\nCreated new wrestler:")
-            print(f"Name: {worker_data['name']}")
-            print(f"Race: {worker_data['Race']}")
-            print(f"Nationality: {worker_data['nationality']}")
-            print(f"Style: {worker_data['style']}")
-            if contract_data:
-                print(f"Company: {contract_data['Name']}")
-            else:
-                print("Status: Freelancer")
-            print("-" * 50)
-
-            return True
-        except Exception as e:
-            logging.error(f"Error saving to Access database: {e}", exc_info=True)
-            return False
-
     def get_response_from_gpt(self, prompt):
-        """Helper method to get responses from GPT"""
         try:
             response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
@@ -1983,25 +1889,20 @@ class WrestleverseApp:
                     )
                     
                     image_url = response.data[0].url
-                    import requests
                     response = requests.get(image_url)
                     response.raise_for_status()
                     
-                    # Resize image to 150x150
                     resized_image = self.resize_image(response.content, (150, 150))
                     
-                    # Ensure filename is trimmed and has .jpg extension
-                    image_name = row['Picture'][:26]  # 26 + 4 (.jpg) = 30 chars
+                    image_name = row['Picture'][:26]
                     image_path = os.path.join(people_dir, image_name)
                     
                     with open(image_path, 'wb') as f:
                         f.write(resized_image)
                     
-                    # Update the Excel file to mark this image as generated
                     df.at[index, 'image_generated'] = True
                     generated_count += 1
                     
-                    # Update status
                     self.status_label.config(text=f"Generating images: {generated_count}/{total_images}")
                     self.root.update_idletasks()
                     
@@ -2064,12 +1965,10 @@ class WrestleverseApp:
                     company_name = row['Name']
                     description = row['Description']
                     
-                    # Clean up and trim filenames
                     logo_filename = (row['Logo'].replace('"', '').replace('\\', '')[:26])
                     banner_filename = (row['Banner'].replace('"', '').replace('\\', '')[:26] + '.jpg')
                     backdrop_filename = (row['Backdrop'].replace('"', '').replace('\\', '')[:26])
                     
-                    # Generate Logo
                     logo_prompt = (
                         f"Professional wrestling company logo for \"{company_name}\". "
                         f"Company description: {description}. "
@@ -2089,19 +1988,17 @@ class WrestleverseApp:
                     response = requests.get(image_url)
                     response.raise_for_status()
                     
-                    # Resize logo to 150x150
                     resized_logo = self.resize_image(response.content, (150, 150))
                     with open(os.path.join(logos_dir, logo_filename), 'wb') as f:
                         f.write(resized_logo)
                     
                     time.sleep(1)
                     
-                    # Generate Banner
                     banner_prompt = (
                         f"Professional wrestling company banner for \"{company_name}\". "
                         f"Company description: {description}. "
                         "Create a wide promotional banner (1:5 aspect ratio) with dynamic wrestling imagery. "
-                        "Include the company name prominently. Make it exciting and eye-catching."
+                        "Include the company name prominently."
                     )
                     
                     response = self.client.images.generate(
@@ -2112,24 +2009,20 @@ class WrestleverseApp:
                         n=1,
                     )
                     
-                    # Save Banner
                     image_url = response.data[0].url
                     response = requests.get(image_url)
                     response.raise_for_status()
                     
-                    # Resize banner to 500x40
                     resized_banner = self.resize_image(response.content, (500, 40))
                     with open(os.path.join(banners_dir, banner_filename), 'wb') as f:
                         f.write(resized_banner)
                     
                     time.sleep(1)
                     
-                    # Generate Backdrop
                     backdrop_prompt = (
                         f"Professional wrestling backdrop for \"{company_name}\". "
                         f"Company description: {description}. "
-                        "Create a dramatic arena backdrop with the company's branding. "
-                        "Should be suitable for a wrestling event, with atmospheric lighting and professional design."
+                        "Create a dramatic arena backdrop with the company's branding."
                     )
                     
                     response = self.client.images.generate(
@@ -2140,12 +2033,10 @@ class WrestleverseApp:
                         n=1,
                     )
                     
-                    # Save Backdrop
                     image_url = response.data[0].url
                     response = requests.get(image_url)
                     response.raise_for_status()
                     
-                    # Resize backdrop to 150x150
                     resized_backdrop = self.resize_image(response.content, (150, 150))
                     with open(os.path.join(backdrops_dir, backdrop_filename), 'wb') as f:
                         f.write(resized_backdrop)
@@ -2189,12 +2080,16 @@ class WrestleverseApp:
         return race_map.get(race_number, "Unknown")
 
     def resize_image(self, image_data, size):
-        """Helper function to resize images"""
         image = Image.open(io.BytesIO(image_data))
         image = image.resize(size, Image.Resampling.LANCZOS)
         output = io.BytesIO()
         image.save(output, format='JPEG')
         return output.getvalue()
+
+    def browse_pictures_path(self):
+        directory = filedialog.askdirectory()
+        if directory:
+            self.pictures_var.set(directory)
 
 if __name__ == "__main__":
     root = tk.Tk()
