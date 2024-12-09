@@ -503,6 +503,7 @@ class WrestleverseApp:
                     continue
 
             total_wrestlers = len(wrestler_data_list)
+
             for index, wrestler_data in enumerate(wrestler_data_list, start=1):
                 self.status_label.config(text=f"Status: Generating wrestler {index}/{total_wrestlers}...")
                 self.root.update_idletasks()
@@ -511,7 +512,6 @@ class WrestleverseApp:
                 gender = wrestler_data['gender']
                 description = wrestler_data['description']
 
-                # Use player-provided description if available
                 player_description = description if description else ""
 
                 if not name and not description:
@@ -590,8 +590,8 @@ class WrestleverseApp:
 
                 style_num = self.get_style_from_gpt(bio) 
                 race = self.get_race_from_gpt(name, f"{description}\n\nBiography: {bio}")
-                picture_name = f"{name.replace(' ', '').lower()[:26]}.jpg"
 
+                # Roles, Languages, Body
                 roles_lang_body_prompt = (
                     f"Given the wrestler's name: {name}, description: {player_description if player_description else description}, and bio: {bio}, "
                     "provide a JSON response with the following:\n"
@@ -601,8 +601,6 @@ class WrestleverseApp:
                     "Return JSON only."
                 )
 
-                # Try multiple attempts if parsing fails, for more bulletproof approach
-                # We'll loop a few times to try and get a valid JSON
                 attempts = 0
                 roles_lang_body_data = None
                 while attempts < 3 and roles_lang_body_data is None:
@@ -618,7 +616,6 @@ class WrestleverseApp:
                         logging.error(f"Error getting roles/lang/body from GPT attempt {attempts}: {e}")
                         roles_lang_body_data = None
 
-                # Default fallback if still None
                 if roles_lang_body_data is None:
                     roles_lang_body_data = {
                         "Wrestler": True,
@@ -676,6 +673,131 @@ class WrestleverseApp:
                 }
                 body_type_text = body_type_map.get(body_type_code, "Average")
 
+                # Determine skill preset
+                if wrestler_data['skill_preset'] == "Interpret":
+                    preset_name = self.select_skill_preset_with_chatgpt(
+                        name,
+                        description,
+                        gender
+                    )
+                else:
+                    preset_name = wrestler_data['skill_preset']
+
+                preset = next((p for p in self.skill_presets if p["name"] == preset_name), self.skill_presets[0])
+                skills = self.generate_skills(uid, preset)
+                skills_data.append(skills)
+
+                # Generate Moveset now (before creating worker_row)
+                # Create a moveset record:
+                moveset_uid_val = None
+                move_conn_str = ""
+                if self.access_db_path and os.path.exists(self.access_db_path):
+                    move_conn_str = (
+                        r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
+                        f'DBQ={self.access_db_path};'
+                        'PWD=20YearsOfTEW;'
+                    )
+                # Generate moves from GPT
+                moves_prompt = (
+                    f"Generate three unique finishing moves for wrestler {name} (Gender: {gender}). "
+                    "Each move should have a short unique name and a short description (max 75 chars). "
+                    "The first is a 'Finisher' (type 1), the second is a 'Secondary Finisher' (type 2), "
+                    "the third is an 'Uber Finisher' (type 3). Return JSON with keys 'Finisher', 'SecondaryFinisher', 'UberFinisher'. "
+                    "Each value an object with 'MoveName' and 'MoveDesc'."
+                )
+                attempts = 0
+                moves_data_gpt = None
+                while attempts < 3 and moves_data_gpt is None:
+                    attempts += 1
+                    try:
+                        move_resp = self.client.chat.completions.create(
+                            model="gpt-3.5-turbo",
+                            messages=[{"role":"user","content":moves_prompt}]
+                        )
+                        moves_json_str = move_resp.choices[0].message.content.strip()
+                        moves_data_gpt = json.loads(moves_json_str)
+                    except Exception as e:
+                        logging.error(f"Error generating moves from GPT attempt {attempts}: {e}")
+                        moves_data_gpt = None
+
+                if moves_data_gpt is None:
+                    moves_data_gpt = {
+                        "Finisher": {"MoveName":"Default Driver","MoveDesc":"A strong slam."},
+                        "SecondaryFinisher": {"MoveName":"Lesser Lariat","MoveDesc":"A quick clothesline."},
+                        "UberFinisher": {"MoveName":"Extreme End","MoveDesc":"A rare, devastating move."}
+                    }
+
+                if move_conn_str:
+                    move_conn = pyodbc.connect(move_conn_str)
+                    move_cursor = move_conn.cursor()
+                    move_cursor.execute("SELECT MAX(UID) FROM tblMoveSet")
+                    result = move_cursor.fetchone()
+                    moveset_uid_val = (result[0] if result[0] else 0) + 1
+                    # Insert into tblMoveSet
+                    sql_insert_moveset = "INSERT INTO tblMoveSet ([UID],[recordName]) VALUES (?,?)"
+                    move_cursor.execute(sql_insert_moveset, (moveset_uid_val, name))
+                    move_conn.commit()
+
+                    def insert_move(move_data, move_type):
+                        move_cursor.execute("SELECT MAX(UID) FROM tblWrestlingMove")
+                        result = move_cursor.fetchone()
+                        move_uid = (result[0] if result[0] else 0) + 1
+
+                        MoveName = move_data["MoveName"][:35]
+                        MoveDesc = move_data["MoveDesc"][:75]
+
+                        MoveBlood = False
+                        MoveChair = False
+                        MoveTable = False
+                        MoveDive = False
+                        MoveInside = True
+                        MoveOutside = False
+                        VictimGender = 0
+                        WeightDifference = 850
+                        VictimMaxWeight = 850
+
+                        sql_insert_move = """
+                            INSERT INTO tblWrestlingMove (
+                                [UID],[MoveName],[MoveDesc],[MoveType],[MoveBlood],[MoveChair],[MoveTable],
+                                [MoveDive],[MoveInside],[MoveOutside],[VictimGender],[WeightDifference],[VictimMaxWeight]
+                            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+                        """
+                        move_cursor.execute(sql_insert_move,
+                            (
+                                move_uid,
+                                MoveName,
+                                MoveDesc,
+                                move_type,
+                                bool(MoveBlood),
+                                bool(MoveChair),
+                                bool(MoveTable),
+                                bool(MoveDive),
+                                bool(MoveInside),
+                                bool(MoveOutside),
+                                VictimGender,
+                                WeightDifference,
+                                VictimMaxWeight
+                            )
+                        )
+
+                        # Insert into tblMoveSetArsenal (the joining table)
+                        move_cursor.execute("SELECT MAX(UID) FROM tblMoveSetArsenal")
+                        result = move_cursor.fetchone()
+                        moveset_entry_uid = (result[0] if result[0] else 0) + 1
+                        sql_insert_movesetarsenal = "INSERT INTO tblMoveSetArsenal ([UID],[MoveSetUID],[Move],[MoveLevel]) VALUES (?,?,?,?)"
+                        move_cursor.execute(sql_insert_movesetarsenal, (moveset_entry_uid, moveset_uid_val, move_uid, move_type))
+
+                        return move_uid
+
+                    insert_move(moves_data_gpt["Finisher"], 1)
+                    insert_move(moves_data_gpt["SecondaryFinisher"], 2)
+                    insert_move(moves_data_gpt["UberFinisher"], 3)
+
+                    move_conn.commit()
+                    move_conn.close()
+
+                # Now create worker_row after we have moveset_uid_val
+                # Set Moveset to moveset_uid_val
                 worker_row = {
                     "UID": int(uid),
                     "User": False,
@@ -696,7 +818,7 @@ class WrestleverseApp:
                     "WorkerWeight": random.randint(150,350),
                     "WorkerMinWeight": 150,
                     "WorkerMaxWeight": 350,
-                    "Picture": picture_name,
+                    "Picture": f"{name.replace(' ', '').lower()[:26]}.jpg",
                     "Nationality": int(1),
                     "Race": self.ensure_byte(race),
                     "Based_In": self.ensure_byte(1),
@@ -725,7 +847,7 @@ class WrestleverseApp:
                     "Speak_Med": int(speak_med),
                     "Speak_Slavic": int(speak_slavic),
                     "Speak_Hindi": int(speak_hindi),
-                    "Moveset": int(0),
+                    "Moveset": moveset_uid_val if moveset_uid_val else 0,
                     "Position_Wrestler": position_wrestler,
                     "Position_Occasional": position_occasional,
                     "Position_Referee": position_referee,
@@ -754,35 +876,12 @@ class WrestleverseApp:
                 workers_data.append(worker_row_converted)
                 bio_data.append([uid, bio])
 
-                if wrestler_data['skill_preset'] == "Interpret":
-                    preset_name = self.select_skill_preset_with_chatgpt(
-                        name,
-                        description,
-                        gender
-                    )
-                else:
-                    preset_name = wrestler_data['skill_preset']
-
-                preset = next((p for p in self.skill_presets if p["name"] == preset_name), self.skill_presets[0])
-                skills = self.generate_skills(uid, preset)
-                skills_data.append(skills)
-
                 if wrestler_data['company'] != "Freelancer":
-                    contract_began_year = self.start_date.year - random.randint(1,5)
-                    contract_began_month = random.randint(1,12)
-                    contract_began_day = random.randint(1,28)
-                    contract_began = datetime.datetime(contract_began_year, contract_began_month, contract_began_day)
-                    if contract_began >= self.start_date:
-                        contract_began = self.start_date - datetime.timedelta(days=60)
-
                     contract = self.generate_contract(wrestler_data, uid, wrestler_data['company'], contract_uid)
                     if contract:
-                        contract["ContractBeganDate"] = contract_began
-                        contract["ContractDebutDate"] = datetime.datetime(1900,1,1)
                         contract_data.append(contract)
                         contract_uid += 1
 
-                    # Use body_type_text and race in physical prompt, and also the player-provided description if exists
                     physical_prompt = (
                         f"Based on this wrestler's details:\n"
                         f"Name: {name}\n"
@@ -1092,73 +1191,6 @@ class WrestleverseApp:
                             contract_values.append(contract[f"PlasterCaster_Bool{i}"])
                         cursor.execute(sql_insert_contract, contract_values)
 
-                    # Enhanced popularity section: multiple attempts to get valid JSON
-                    for worker_row in workers_data:
-                        worker_uid = worker_row["UID"]
-                        bio_for_pop = ""
-                        name_for_pop = ""
-                        for b in bio_data:
-                            if b[0] == worker_uid:
-                                bio_for_pop = b[1]
-                                break
-                        for n in notes_data:
-                            if n["Name"][:30] == worker_row["Name"]:
-                                name_for_pop = n["Name"]
-                                # We'll also pass player description if it was provided
-                                # but the function currently only uses name and bio.
-                                # Let's try to make popularity prompt robust by including description:
-                                player_desc_for_pop = n["Description"] if n["Description"] else ""
-                                break
-
-                        pop_prompt = (
-                            f"Provide popularity categories for a wrestler named {name_for_pop} with the bio {bio_for_pop}.\n"
-                            "Consider the wrestler's description if available: " + player_desc_for_pop + "\n\n"
-                            "Regions:\n"
-                            "America\nCanada\nMexico\nBritish Isles\nJapan\nEurope\nOceania\nIndia\n\n"
-                            "The categories are: Unknown, Insignificant, Indie Popularity, Recognized, Well Known, Very Popular, Superstar.\n"
-                            "Return JSON only with keys as region names and values as categories.\n"
-                            "If unsure, use 'Unknown'."
-                        )
-
-                        popularity_data = None
-                        attempts = 0
-                        while attempts < 3 and popularity_data is None:
-                            attempts += 1
-                            try:
-                                response = self.client.chat.completions.create(
-                                    model="gpt-3.5-turbo",
-                                    messages=[{"role": "user", "content": pop_prompt}]
-                                )
-                                content = response.choices[0].message.content.strip()
-                                p_data = json.loads(content)
-                                required_keys = ["America","Canada","Mexico","British Isles","Japan","Europe","Oceania","India"]
-                                if all(key in p_data for key in required_keys):
-                                    popularity_data = p_data
-                                else:
-                                    raise ValueError("Missing required keys in popularity JSON.")
-                            except Exception as e:
-                                logging.error(f"Error getting popularity from GPT attempt {attempts}: {e}")
-                                popularity_data = None
-
-                        if popularity_data is None:
-                            popularity_data = {
-                                "America": "Unknown",
-                                "Canada": "Unknown",
-                                "Mexico": "Unknown",
-                                "British Isles": "Unknown",
-                                "Japan": "Unknown",
-                                "Europe": "Unknown",
-                                "Oceania": "Unknown",
-                                "India": "Unknown"
-                            }
-
-                        popularity_values = self.convert_popularity_categories_to_values(popularity_data)
-                        columns = ["WorkerUID"] + [f"Over{i}" for i in range(1,58)]
-                        placeholders = ", ".join(["?"] * 58)
-                        sql_insert_over = f"INSERT INTO tblWorkerOver ({', '.join(columns)}) VALUES ({placeholders})"
-                        over_values = [worker_uid] + popularity_values
-                        cursor.execute(sql_insert_over, over_values)
-
                     conn.commit()
                     conn.close()
                 except Exception as e:
@@ -1217,8 +1249,6 @@ class WrestleverseApp:
             messagebox.showerror("Error", error_message)
 
     def get_region_popularity_from_gpt(self, name, bio):
-        # This function is still called but we now implement a more robust approach inline above.
-        # We'll keep this for compatibility, but we'll rely on the robust approach.
         return {
             "America": "Unknown",
             "Canada": "Unknown",
@@ -1999,7 +2029,7 @@ class WrestleverseApp:
             if pending_images.empty:
                 messagebox.showinfo("Info", "No pending images to generate.")
                 return
-                
+            
             total_companies = len(pending_images)
             generated_count = 0
             
