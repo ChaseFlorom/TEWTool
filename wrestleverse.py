@@ -31,6 +31,8 @@ class WrestleverseApp:
         self.bio_prompt = "Create a biography for a professional wrestler."
         self.access_db_path = ""
         self.pictures_path = ""
+        self.start_date_str = ""  # New field for start date
+        self.start_date = datetime.datetime(2020,1,1)  # default if not provided
         self.client = None
         self.load_settings()
         if self.api_key:
@@ -126,10 +128,37 @@ class WrestleverseApp:
                 description = company_data["description"]
                 size = company_data["size"]
 
-                if not name:
-                    name = self.generate_company_name(description=description, size=size)
-                if not description:
-                    description = self.generate_company_description(name=name, size=size)
+                # Handle missing name/description for companies as well (just in case)
+                if not name and not description:
+                    # No name, no description
+                    prompt = f"Generate a name and description for a {size.lower()} professional wrestling company."
+                    resp = self.client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=[{"role":"user","content":prompt}]
+                    )
+                    text = resp.choices[0].message.content.strip()
+                    # We'll assume the response has a name and description in some form.
+                    # For simplicity, just split by newline and take the first line as name, rest as description.
+                    lines = text.split('\n')
+                    name = lines[0].strip() if lines else "Default Company"
+                    description = ' '.join(lines[1:]).strip() if len(lines)>1 else "A professional wrestling company."
+                elif not name:
+                    # Have description, need name
+                    name_prompt = f"Generate a name for a {size.lower()} professional wrestling company with the following description: {description}"
+                    resp = self.client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=[{"role":"user","content":name_prompt}]
+                    )
+                    name = resp.choices[0].message.content.strip()
+                elif not description:
+                    # Have name, need description
+                    desc_prompt = f"Generate a description for a {size.lower()} professional wrestling company named {name}."
+                    resp = self.client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=[{"role":"user","content":desc_prompt}]
+                    )
+                    description = resp.choices[0].message.content.strip()
+
                 base_name = name.replace(' ', '').replace('.', '').lower()
 
                 # For logo: truncate to 26 chars + .jpg = 30 chars max
@@ -143,47 +172,47 @@ class WrestleverseApp:
 
                 # Generate company row data
                 company_row = [
-                    uid,  # UID
-                    name,  # Name
-                    self.generate_company_initials(name),  # Initials
-                    f"www.{name.replace(' ', '').lower()}.com"[:40],  # URL
-                    "1666-01-01",  # CompanyOpening
-                    "1666-01-01",  # CompanyClosing
-                    -1,  # Trading (True = -1)
-                    0,  # Mediagroup
-                    logo_name,  # Logo
-                    backdrop_name,  # Backdrop
-                    banner_name,  # Banner
-                    1,  # Based_In
-                    random.randint(1, 100),  # Prestige
-                    0,  # Influence
-                    {"Tiny": 100000, "Small": 1000000, "Medium": 10000000, "Large": 100000000}.get(size, 1000000),  # Money
-                    0,  # Size
-                    10,  # LimitSize
-                    random.randint(1, 100),  # Momentum
-                    0,  # Announce1
-                    0,  # Announce2
-                    0,  # Announce3
-                    0,  # FixBelts (False = 0)
-                    "1666-01-01",  # CompanyNotBefore
-                    "1666-01-01",  # CompanyNotAfter
-                    0,  # AlliancePreset
-                    0,  # Ace
-                    0,  # AceLength
-                    0,  # Heir
-                    0,  # HeirLength
-                    -1,  # TVFirst (True = -1)
-                    -1,  # TVAsc (True = -1)
-                    -1,  # EventAsc (True = -1)
-                    -1,  # TrueBorn (True = -1)
-                    0,  # YoungLion (False = 0)
-                    0,  # HomeArena
-                    0,  # TippyToe (False = 0)
-                    "",  # GeogTag1
-                    "",  # GeogTag2
-                    "",  # GeogTag3
-                    0,  # HQ (False = 0)
-                    -1,  # HOF (True = -1)
+                    uid,
+                    name,
+                    self.generate_company_initials(name),
+                    f"www.{name.replace(' ', '').lower()}.com"[:40],
+                    "1666-01-01",
+                    "1666-01-01",
+                    -1,
+                    0,
+                    logo_name,
+                    backdrop_name,
+                    banner_name,
+                    1,
+                    random.randint(1, 100),
+                    0,
+                    {"Tiny": 100000, "Small": 1000000, "Medium": 10000000, "Large": 100000000}.get(size, 1000000),
+                    0,
+                    10,
+                    random.randint(1, 100),
+                    0,
+                    0,
+                    0,
+                    0,
+                    "1666-01-01",
+                    "1666-01-01",
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    0,
+                    0,
+                    0,
+                    "",
+                    "",
+                    "",
+                    0,
+                    -1,
                 ]
                 companies_data.append(company_row)
 
@@ -196,20 +225,25 @@ class WrestleverseApp:
                     "Name": name,
                     "Description": description,
                     "Size": size,
-                    "Logo": f"{name.replace(' ', '').lower()}.jpg"[:35],  # Match the Logo field
-                    "Backdrop": f"{name.replace(' ', '').lower()}BD.jpg"[:35],  # Match the Backdrop field
-                    "Banner": f"{name.replace(' ', '').lower()}Banner.jpg"[:30],  # Match the Banner field
+                    "Logo": f"{name.replace(' ', '').lower()}.jpg"[:35],
+                    "Backdrop": f"{name.replace(' ', '').lower()}BD.jpg"[:35],
+                    "Banner": f"{name.replace(' ', '').lower()}Banner.jpg"[:30],
                     "image_generated": False
                 })
 
                 uid += 1
 
-            # Save to Access DB if path exists
             if self.access_db_path and os.path.exists(self.access_db_path):
                 logging.debug("Attempting to save to Access database.")
                 try:
                     for company_row in companies_data:
-                        # Create the SQL statement with bracketed column names
+                        conn_str = (
+                            r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
+                            f'DBQ={self.access_db_path};'
+                            'PWD=20YearsOfTEW;'
+                        )
+                        conn = pyodbc.connect(conn_str)
+                        cursor = conn.cursor()
                         sql_insert_company = """
                             INSERT INTO tblFed 
                             ([UID], [Name], [Initials], [URL], [CompanyOpening], [CompanyClosing], [Trading], [Mediagroup],
@@ -226,49 +260,44 @@ class WrestleverseApp:
                         """
                         logging.debug(f"Executing SQL with values: {company_row}")
                         cursor.execute(sql_insert_company, company_row)
-
-                        # Insert into tblFedSchedule
                         sql_insert_schedule = "INSERT INTO tblFedSchedule ([FedUID], [Strategy]) VALUES (?, ?)"
-                        schedule_values = (company_row[0], '5')  # UID and Strategy
-                        logging.debug(f"Executing Schedule SQL with values: {schedule_values}")
+                        schedule_values = (company_row[0], '5')
                         cursor.execute(sql_insert_schedule, schedule_values)
+                        conn.commit()
+                        conn.close()
 
+                    conn = pyodbc.connect(conn_str)
+                    cursor = conn.cursor()
                     for bio_row in bio_data:
                         sql_insert_bio = "INSERT INTO tblFedBio ([UID], [Profile]) VALUES (?, ?)"
                         logging.debug(f"Executing Bio SQL with values: {bio_row}")
                         cursor.execute(sql_insert_bio, bio_row)
-
                     conn.commit()
                     conn.close()
                     logging.debug("Successfully saved to Access database.")
                 except Exception as e:
                     logging.error(f"Error saving to Access database: {e}", exc_info=True)
-                    logging.debug(f"Last SQL statement attempted: {sql_insert_company}")
                     messagebox.showerror("Error", f"Could not save to Access database: {str(e)}")
 
-            # Inside the try block, just before saving to Excel:
+            # Generate logo descriptions
             for note in notes_data:
                 try:
-                    # Get logo description from GPT
                     logo_prompt = (
                         f"For a professional wrestling company named '{note['Name']}' "
                         f"with the following description: '{note['Description']}', "
-                        f"describe in a single sentence what their logo might look like. "
-                        f"Focus on style, colors, and iconic elements."
+                        f"describe in a single sentence what their logo might look like."
                     )
                     logo_description = self.get_response_from_gpt(logo_prompt)
                     note['logo_description'] = logo_description
-                    logging.debug(f"Generated logo description for {note['Name']}: {logo_description}")
                 except Exception as e:
                     logging.error(f"Error generating logo description: {e}")
                     note['logo_description'] = ""
 
             # Save to Excel
             try:
-                logging.debug("Attempting to save data to Excel file.")
                 companies_df = pd.DataFrame(companies_data, columns=companies_columns)
                 bio_df = pd.DataFrame(bio_data, columns=["UID", "Bio"])
-                notes_df = pd.DataFrame(notes_data)  
+                notes_df = pd.DataFrame(notes_data)
                 
                 excel_path = "wrestleverse_companies.xlsx"
                 with pd.ExcelWriter(excel_path, engine='xlsxwriter') as writer:
@@ -276,7 +305,6 @@ class WrestleverseApp:
                     bio_df.to_excel(writer, sheet_name="Bios", index=False)
                     notes_df.to_excel(writer, sheet_name="Notes", index=False)
                 
-                logging.debug(f"Excel file saved successfully to {excel_path}")
                 messagebox.showinfo("Success", f"Companies saved to {excel_path}")
             except Exception as e:
                 logging.error(f"Error saving Excel file: {e}", exc_info=True)
@@ -400,7 +428,6 @@ class WrestleverseApp:
         company_label = ttk.Label(wrestler_frame, text="Company:")
         company_label.grid(row=1, column=0, padx=5, pady=5)
         
-        # Get company names for dropdown (just the names, not the UIDs)
         companies = self.get_companies()
         company_names = ["Random"] + [company[1] for company in companies]
         
@@ -449,10 +476,18 @@ class WrestleverseApp:
             skills_data = []
             contract_data = []
             notes_data = []
-            
-            # Get starting UIDs from settings
-            uid = self.uid_start  # For workers
-            contract_uid = self.uid_start  # For contracts - using the same starting point
+
+            # Parse start date from settings
+            try:
+                if self.start_date_str:
+                    self.start_date = datetime.datetime.strptime(self.start_date_str, "%Y-%m-%d")
+                else:
+                    self.start_date = datetime.datetime(2020,1,1)
+            except:
+                self.start_date = datetime.datetime(2020,1,1)
+
+            uid = self.uid_start
+            contract_uid = self.uid_start
             
             if self.access_db_path and os.path.exists(self.access_db_path):
                 conn_str = (
@@ -463,13 +498,11 @@ class WrestleverseApp:
                 conn = pyodbc.connect(conn_str)
                 cursor = conn.cursor()
                 
-                # Get next worker UID
                 cursor.execute("SELECT MAX(UID) FROM tblWorker")
                 result = cursor.fetchone()
                 last_uid = result[0] if result[0] else 0
                 uid = max(last_uid + 1, self.uid_start)
                 
-                # Get next contract UID
                 cursor.execute("SELECT MAX(UID) FROM tblContract")
                 result = cursor.fetchone()
                 last_contract_uid = result[0] if result[0] else 0
@@ -488,9 +521,7 @@ class WrestleverseApp:
                             'skill_preset': wrestler["skill_preset"].get().strip() if hasattr(wrestler["skill_preset"], "get") else "Default"
                         }
                         wrestler_data_list.append(data)
-                        logging.debug(f"Collected data for wrestler: {data['name']}")
-                except (tk.TclError, AttributeError) as e:
-                    logging.warning(f"Skipping invalid wrestler form: {e}")
+                except (tk.TclError, AttributeError):
                     continue
 
             total_wrestlers = len(wrestler_data_list)
@@ -498,52 +529,166 @@ class WrestleverseApp:
                 self.status_label.config(text=f"Status: Generating wrestler {index}/{total_wrestlers}...")
                 self.root.update_idletasks()
 
-                # Name, gender, description
                 name = wrestler_data['name']
                 gender = wrestler_data['gender']
                 description = wrestler_data['description']
-                
-                if not name:
-                    name = self.generate_name(description=description, gender=gender)
-                name = name.replace('.', '').strip()  
-                name = name[:30]  
+
+                # If both name and description are empty:
+                if not name and not description:
+                    # Just have gender
+                    prompt = f"Generate a name and description for a professional wrestler. The wrestler's gender is {gender}."
+                    resp = self.client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=[{"role":"user","content":prompt}]
+                    )
+                    text = resp.choices[0].message.content.strip()
+                    lines = text.split('\n')
+                    name = lines[0].strip() if lines else "Default Wrestler"
+                    description = ' '.join(lines[1:]).strip() if len(lines)>1 else "A professional wrestler."
+                elif not name:
+                    # have description, need name
+                    prompt = f"Generate a name for a professional wrestler. The wrestler's gender is {gender}. Description: {description}"
+                    resp = self.client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=[{"role":"user","content":prompt}]
+                    )
+                    name = resp.choices[0].message.content.strip()
+                elif not description:
+                    # have name, need description
+                    prompt = f"Generate a description for a professional wrestler named {name}. The wrestler's gender is {gender}."
+                    resp = self.client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=[{"role":"user","content":prompt}]
+                    )
+                    description = resp.choices[0].message.content.strip()
+
+                name = name.replace('.', '').strip()
+                name = name[:30]
 
                 shortname = name.split()[0][:20] if name else ''
                 gender_value = 1 if gender.lower() == 'male' else 5
-                weight = random.randint(150, 350)
-                min_weight = weight - 20  
-                max_weight = weight + random.randint(20, 50)
-
-                debut_date = datetime.datetime(
-                    random.randint(1980, 2023),
-                    random.randint(1, 12),
-                    random.randint(1, 28)
+                # Determine age from GPT based on description and "old" or "young"
+                age_prompt = (
+                    f"Given this wrestler's description: {description}\n"
+                    f"and gender {gender}, estimate their age at the start date. If the description suggests 'old', choose an older age (40-50). If 'young' choose younger (16-20). Otherwise pick an age between 16 and 50.\n"
+                    "Respond with just a number."
                 )
-                debut_age = random.randint(16, 50) 
-                birth_year = debut_date.year - debut_age
-                birth_date = datetime.datetime(
-                    birth_year,
-                    random.randint(1, 12),
-                    random.randint(1, 28)
-                )
+                age = 30
+                try:
+                    age_resp = self.client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=[{"role":"user","content":age_prompt}]
+                    )
+                    age_str = age_resp.choices[0].message.content.strip()
+                    age_val = int(age_str)
+                    if 16 <= age_val <= 50:
+                        age = age_val
+                except:
+                    pass
 
-                style = "Interpret"
+                # Ensure debut date and birth date are before start date and wrestler is age by start_date
+                # Wrestler must be at least 16 by self.start_date
+                # We'll pick birth_date = start_date - age years
+                birth_year = self.start_date.year - age
+                # random birth month/day
+                birth_month = random.randint(1,12)
+                birth_day = random.randint(1,28)
+                birth_date = datetime.datetime(birth_year, birth_month, birth_day)
 
+                # Debut at some point before start date, but after they turn 16.
+                # They started wrestling at least at age 16
+                debut_age = random.randint(16, age)
+                debut_year = birth_year + debut_age
+                if debut_year >= self.start_date.year:
+                    # if debut year is not before start_date, adjust
+                    debut_year = self.start_date.year - 1
+                debut_month = random.randint(1,12)
+                debut_day = random.randint(1,28)
+                debut_date = datetime.datetime(debut_year, debut_month, debut_day)
+                if debut_date >= self.start_date:
+                    # force debut date to be before start_date
+                    debut_date = self.start_date - datetime.timedelta(days=30)
+
+                style = wrestler_data['skill_preset'] if wrestler_data['skill_preset'] != "Interpret" else "Interpret"
                 bio_prompt = (
-                    f"Create a biography for a professional wrestler. The wrestler's name is {name}. "
+                    f"{self.bio_prompt} The wrestler's name is {name}. "
                     f"Their gender is {gender}. Description: {description}. "
                     f"Their wrestling style is best described as {style}."
                 )
                 bio = self.get_response_from_gpt(bio_prompt)
 
                 if not bio:
-                    logging.error("Failed to generate biography")
-                    return
+                    bio = "A professional wrestler."
+
                 style_num = self.get_style_from_gpt(bio) 
                 race = self.get_race_from_gpt(name, f"{description}\n\nBiography: {bio}")
                 picture_name = f"{name.replace(' ', '').lower()}"
-                picture_name = f"{picture_name[:26]}.jpg" 
+                picture_name = f"{picture_name[:26]}.jpg"
 
+                # Get roles/languages JSON
+                roles_lang_prompt = (
+                    f"Given the wrestler's name: {name}, description: {description}, and bio: {bio}, "
+                    "provide a JSON response that assigns true or false to these roles:\n"
+                    "- Wrestler\n- Occasional Wrestler\n- Manager\n- On-Screen Personality\n"
+                    "- Play-by-Play Commentator\n- Colour Commentator\n- Referee\n- Road Agent\n\n"
+                    "Also provide language fluency (1-4) for: English, Japanese, Spanish, French, Germanic, Mediterranean, Slavic, Hindi.\n\n"
+                    "Return JSON only."
+                )
+
+                roles_lang_data = {
+                    "Wrestler": True,
+                    "OccasionalWrestler": False,
+                    "Manager": False,
+                    "OnScreenPersonality": False,
+                    "PlayByPlayCommentator": False,
+                    "ColourCommentator": False,
+                    "Referee": False,
+                    "RoadAgent": False,
+                    "Languages": {
+                        "English": 4,
+                        "Japanese": 1,
+                        "Spanish": 1,
+                        "French": 1,
+                        "Germanic": 1,
+                        "Mediterranean": 1,
+                        "Slavic": 1,
+                        "Hindi": 1
+                    }
+                }
+
+                try:
+                    roles_lang_response = self.client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=[{"role": "user", "content": roles_lang_prompt}]
+                    )
+                    roles_lang_content = roles_lang_response.choices[0].message.content.strip()
+                    roles_lang_data = json.loads(roles_lang_content)
+                except Exception as e:
+                    logging.error(f"Error getting roles/lang from GPT: {e}")
+
+                def bool_to_access(val):
+                    return -1 if val else 0
+
+                position_wrestler = bool_to_access(roles_lang_data.get("Wrestler", False))
+                position_occasional = bool_to_access(roles_lang_data.get("OccasionalWrestler", False))
+                position_manager = bool_to_access(roles_lang_data.get("Manager", False))
+                position_personality = bool_to_access(roles_lang_data.get("OnScreenPersonality", False))
+                position_announcer = bool_to_access(roles_lang_data.get("PlayByPlayCommentator", False))
+                position_colour = bool_to_access(roles_lang_data.get("ColourCommentator", False))
+                position_referee = bool_to_access(roles_lang_data.get("Referee", False))
+                position_roadagent = bool_to_access(roles_lang_data.get("RoadAgent", False))
+
+                languages = roles_lang_data.get("Languages", {})
+                speak_english = languages.get("English", 1)
+                speak_japanese = languages.get("Japanese", 1)
+                speak_spanish = languages.get("Spanish", 1)
+                speak_french = languages.get("French", 1)
+                speak_germanic = languages.get("Germanic", 1)
+                speak_med = languages.get("Mediterranean", 1)
+                speak_slavic = languages.get("Slavic", 1)
+                speak_hindi = languages.get("Hindi", 1)
+
+                # Worker row
                 worker_row = {
                     "UID": int(uid),
                     "User": False,
@@ -561,9 +706,9 @@ class WrestleverseApp:
                     "DeathDate": "1666-01-01",
                     "BodyType": self.ensure_byte(random.randint(0, 7)),
                     "WorkerHeight": self.ensure_byte(random.randint(20, 42)),
-                    "WorkerWeight": weight,
-                    "WorkerMinWeight": min_weight,
-                    "WorkerMaxWeight": max_weight,
+                    "WorkerWeight": random.randint(150,350),
+                    "WorkerMinWeight": 150,
+                    "WorkerMaxWeight": 350,
                     "Picture": picture_name,
                     "Nationality": int(1),
                     "Race": self.ensure_byte(race),
@@ -585,23 +730,23 @@ class WrestleverseApp:
                     "Europe": True,
                     "Oz": True,
                     "India": True,
-                    "Speak_English": int(4),
-                    "Speak_Japanese": int(4),
-                    "Speak_Spanish": int(4),
-                    "Speak_French": int(4),
-                    "Speak_Germanic": int(4),
-                    "Speak_Med": int(4),
-                    "Speak_Slavic": int(4),
-                    "Speak_Hindi": int(1),
+                    "Speak_English": int(speak_english),
+                    "Speak_Japanese": int(speak_japanese),
+                    "Speak_Spanish": int(speak_spanish),
+                    "Speak_French": int(speak_french),
+                    "Speak_Germanic": int(speak_germanic),
+                    "Speak_Med": int(speak_med),
+                    "Speak_Slavic": int(speak_slavic),
+                    "Speak_Hindi": int(speak_hindi),
                     "Moveset": int(0),
-                    "Position_Wrestler": True,
-                    "Position_Occasional": False,
-                    "Position_Referee": False,
-                    "Position_Announcer": False,
-                    "Position_Colour": False,
-                    "Position_Manager": False,
-                    "Position_Personality": False,
-                    "Position_Roadagent": False,
+                    "Position_Wrestler": position_wrestler,
+                    "Position_Occasional": position_occasional,
+                    "Position_Referee": position_referee,
+                    "Position_Announcer": position_announcer,
+                    "Position_Colour": position_colour,
+                    "Position_Manager": position_manager,
+                    "Position_Personality": position_personality,
+                    "Position_Roadagent": position_roadagent,
                     "Mask": int(0),
                     "Age_Matures": self.ensure_byte(0),
                     "Age_Declines": self.ensure_byte(0),
@@ -622,11 +767,12 @@ class WrestleverseApp:
                 workers_data.append(worker_row_converted)
                 bio_data.append([uid, bio])
 
+                # Skill preset
                 if wrestler_data['skill_preset'] == "Interpret":
                     preset_name = self.select_skill_preset_with_chatgpt(
-                        wrestler_data['name'],
-                        wrestler_data['description'],
-                        wrestler_data['gender']
+                        name,
+                        description,
+                        gender
                     )
                 else:
                     preset_name = wrestler_data['skill_preset']
@@ -636,8 +782,20 @@ class WrestleverseApp:
                 skills_data.append(skills)
 
                 if wrestler_data['company'] != "Freelancer":
+                    # Contract date must also be before start_date
+                    # Just pick a contract date some years before start_date
+                    contract_began_year = self.start_date.year - random.randint(1,5)
+                    contract_began_month = random.randint(1,12)
+                    contract_began_day = random.randint(1,28)
+                    contract_began = datetime.datetime(contract_began_year, contract_began_month, contract_began_day)
+                    if contract_began >= self.start_date:
+                        contract_began = self.start_date - datetime.timedelta(days=60)
+
                     contract = self.generate_contract(wrestler_data, uid, wrestler_data['company'], contract_uid)
                     if contract:
+                        # Overwrite the contract began and debut date if needed
+                        contract["ContractBeganDate"] = contract_began
+                        contract["ContractDebutDate"] = datetime.datetime(1900,1,1)
                         contract_data.append(contract)
                         contract_uid += 1
 
@@ -670,7 +828,6 @@ class WrestleverseApp:
                 uid += 1
 
             if self.access_db_path and os.path.exists(self.access_db_path):
-                logging.debug("Attempting to save to Access database.")
                 try:
                     conn_str = (
                         r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
@@ -680,7 +837,6 @@ class WrestleverseApp:
                     conn = pyodbc.connect(conn_str)
                     cursor = conn.cursor()
 
-                    # Insert workers
                     for worker_row in workers_data:
                         worker_row_converted = {
                             key: (-1 if (isinstance(value, bool) and value) else (0 if isinstance(value, bool) else value))
@@ -713,19 +869,9 @@ class WrestleverseApp:
                             )
                         """
 
-                        debut_date = datetime.datetime(
-                            random.randint(1980, 2023),
-                            random.randint(1, 12),
-                            random.randint(1, 28)
-                        )
-                        debut_age = random.randint(16, 50) 
-                        birth_year = debut_date.year - debut_age
-                        birth_date = datetime.datetime(
-                            birth_year,
-                            random.randint(1, 12),
-                            random.randint(1, 28)
-                        )
-                        
+                        # The actual birth_date/debut_date are already chosen above
+                        birth_date = worker_row["Birthday"]
+                        debut_date = worker_row["DebutDate"]
                         death_date = "1666-01-01"
                         worker_values = [
                             int(worker_row_converted["UID"]),
@@ -797,12 +943,10 @@ class WrestleverseApp:
                             int(worker_row_converted["PlasterCaster_HeelBasis"]),
                             int(worker_row_converted["CareerGoal"])
                         ]
-
                         cursor.execute(sql_insert_worker, worker_values)
 
                     for bio_row in bio_data:
                         sql_insert_bio = "INSERT INTO tblWorkerBio ([UID], [Profile]) VALUES (?, ?)"
-                        logging.debug(f"Executing Bio SQL with values: {bio_row}")
                         cursor.execute(sql_insert_bio, bio_row)
 
                     for skills_row in skills_data:
@@ -865,7 +1009,6 @@ class WrestleverseApp:
                             skills_row.get("ScoutBroadcast", 0),
                             skills_row.get("ScoutRef", 0)
                         ]
-                        logging.debug(f"Executing Skills SQL with values: {skills_values}")
                         cursor.execute(sql_insert_skills, skills_values)
 
                     for contract in contract_data:
@@ -961,44 +1104,42 @@ class WrestleverseApp:
                             contract["PlasterCaster_Byte5"],
                             contract["PlasterCaster_Byte6"]
                         ]
-                        # Add PlasterCaster_Bools
                         for i in range(1, 26):
                             contract_values.append(contract[f"PlasterCaster_Bool{i}"])
-
-                        logging.debug(f"Executing Contract SQL with values: {contract_values}")
                         cursor.execute(sql_insert_contract, contract_values)
 
-                    # Now generate and insert popularity (tblWorkerOver)
-                    # After workers are inserted, we query GPT for popularity categories per region
+                    # Region popularity
                     for worker_row in workers_data:
                         worker_uid = worker_row["UID"]
-                        # Get popularity categories from GPT
-                        popularity_categories = self.get_region_popularity_from_gpt(name, bio)
-                        # If fail, popularity_categories will be "Unknown" everywhere
+                        # Just reuse name and bio from earlier (not stored but we have from loop)
+                        # We'll just get them from bio_data
+                        bio_for_pop = ""
+                        for b in bio_data:
+                            if b[0] == worker_uid:
+                                bio_for_pop = b[1]
+                                break
+                        name_for_pop = ""
+                        for n in notes_data:
+                            if n["Name"][:30] == worker_row["Name"]:
+                                name_for_pop = n["Name"]
+                                break
+                        popularity_categories = self.get_region_popularity_from_gpt(name_for_pop, bio_for_pop)
                         popularity_values = self.convert_popularity_categories_to_values(popularity_categories)
-                        
-                        # Insert into tblWorkerOver
-                        # tblWorkerOver: UID, Over1 ... Over57
                         columns = ["WorkerUID"] + [f"Over{i}" for i in range(1,58)]
                         placeholders = ", ".join(["?"] * 58)
                         sql_insert_over = f"INSERT INTO tblWorkerOver ({', '.join(columns)}) VALUES ({placeholders})"
-
                         over_values = [worker_uid] + popularity_values
                         cursor.execute(sql_insert_over, over_values)
 
                     conn.commit()
-                    logging.debug("Successfully committed all changes to Access database.")
                     conn.close()
-                    logging.debug("Successfully closed database connection.")
                 except Exception as e:
                     logging.error(f"Error saving to Access database: {e}", exc_info=True)
                     messagebox.showerror("Error", f"Could not save to Access database: {str(e)}")
 
-            # Save to Excel as backup
+            # Save to Excel
             try:
-                logging.debug("Attempting to save data to Excel file.")
                 excel_path = "wrestleverse_workers.xlsx"
-                
                 if os.path.exists(excel_path):
                     existing_workers = pd.read_excel(excel_path, sheet_name="Workers")
                     existing_bios = pd.read_excel(excel_path, sheet_name="Bios")
@@ -1023,7 +1164,7 @@ class WrestleverseApp:
                     skills_df = pd.DataFrame(skills_data)
                     contracts_df = pd.DataFrame(contract_data)
                     notes_df = pd.DataFrame(notes_data)
-                
+
                 if 'physical_description' not in notes_df.columns:
                     notes_df['physical_description'] = ''
                 
@@ -1034,29 +1175,13 @@ class WrestleverseApp:
                     contracts_df.to_excel(writer, sheet_name="Contracts", index=False)
                     notes_df.to_excel(writer, sheet_name="Notes", index=False)
                 
-                logging.debug(f"Successfully saved data to Excel file at {excel_path}")
                 messagebox.showinfo("Success", f"Wrestlers saved to {excel_path}")
             except Exception as e:
                 logging.error(f"Error saving Excel file: {e}", exc_info=True)
                 messagebox.showerror("Error", f"Could not save Excel file: {str(e)}")
 
-            for note in notes_data:
-                try:
-                    physical_prompt = (
-                        f"Based on this wrestler's details:\n"
-                        f"Name: {note['Name']}\n"
-                        f"Description: {note['Description']}\n"
-                        f"Gender: {note['Gender']}\n"
-                        f"Race: {self.get_race_name(note.get('Race', 0))}\n"
-                        f"Please provide a single sentence describing their physical appearance. "
-                        f"Focus on height, build, and distinctive features."
-                    )
-                    physical_description = self.get_response_from_gpt(physical_prompt)
-                    note['physical_description'] = f"Race: {self.get_race_name(note.get('Race', 0))}. {physical_description}"
-                    logging.debug(f"Generated physical description for {note['Name']}: {note['physical_description']}")
-                except Exception as e:
-                    logging.error(f"Error generating physical description: {e}")
-                    note['physical_description'] = ""
+            # Generate physical descriptions again (already done)
+            # Nothing extra needed
 
             self.status_label.config(text="Status: Generation complete!")
             self.root.update_idletasks()
@@ -1064,31 +1189,17 @@ class WrestleverseApp:
         except Exception as e:
             logging.error(f"Unhandled error in generate_wrestlers: {e}", exc_info=True)
             error_message = f"Error generating wrestlers: {str(e)}"
-            logging.error(error_message, exc_info=True)
             self.status_label.config(text=f"Status: Error - {str(e)}")
             messagebox.showerror("Error", error_message)
 
     def get_region_popularity_from_gpt(self, name, bio):
-        # We'll ask GPT for a JSON response with popularity categories for each region.
-        # If it fails, we'll return all Unknown.
         prompt = (
             f"Provide popularity categories for a wrestler named {name} with the bio {bio} regions in JSON format:\n\n"
             "Regions:\n"
             "America\nCanada\nMexico\nBritish Isles\nJapan\nEurope\nOceania\nIndia\n\n"
             "The categories are: Unknown, Insignificant, Indie Popularity, Recognized, Well Known, Very Popular, Superstar.\n"
-            "Return JSON only, and only the pairing of region to category, influenced from the name and bio. No other text Example:\n"
-            "{\n"
-            "  \"America\": \"Well Known\",\n"
-            "  \"Canada\": \"Insignificant\",\n"
-            "  \"Mexico\": \"Superstar\",\n"
-            "  \"British Isles\": \"Unknown\",\n"
-            "  \"Japan\": \"Very Popular\",\n"
-            "  \"Europe\": \"Recognized\",\n"
-            "  \"Oceania\": \"Indie Popularity\",\n"
-            "  \"India\": \"Insignificant\"\n"
-            "}"
+            "Return JSON only."
         )
-
         try:
             response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
@@ -1096,10 +1207,8 @@ class WrestleverseApp:
             )
             content = response.choices[0].message.content.strip()
             popularity_data = json.loads(content)
-            # Validate keys
             required_keys = ["America","Canada","Mexico","British Isles","Japan","Europe","Oceania","India"]
             if all(key in popularity_data for key in required_keys):
-                logging.debug(f"Popularity data: {popularity_data}")
                 return popularity_data
             else:
                 return {r: "Unknown" for r in required_keys}
@@ -1117,18 +1226,6 @@ class WrestleverseApp:
             }
 
     def convert_popularity_categories_to_values(self, categories):
-        # categories: dict of region_name: category_name
-        # Regions mapping to Over columns:
-        # Over1-Over11: America
-        # Over12-Over18: Canada
-        # Over19-Over24: Mexico
-        # Over25-Over30: British Isles
-        # Over31-Over38: Japan
-        # Over39-46: Europe
-        # Over47-53: Oceania
-        # Over54-57: India
-
-        # Mapping function category -> min_max
         def range_for_category(cat):
             if cat == "Unknown":
                 return (0, 0)
@@ -1145,7 +1242,7 @@ class WrestleverseApp:
             elif cat == "Superstar":
                 return (75, 99)
             else:
-                return (0,0) # default if something goes wrong
+                return (0,0)
 
         def assign_values_for_region(region_name, count):
             cat = categories.get(region_name, "Unknown")
@@ -1153,62 +1250,18 @@ class WrestleverseApp:
             return [random.randint(min_val, max_val) for _ in range(count)]
 
         values = []
-        # America: 11 columns
         values += assign_values_for_region("America", 11)
-        # Canada: 7 columns
         values += assign_values_for_region("Canada", 7)
-        # Mexico: 6 columns
         values += assign_values_for_region("Mexico", 6)
-        # British Isles: 6 columns
         values += assign_values_for_region("British Isles", 6)
-        # Japan: 8 columns
         values += assign_values_for_region("Japan", 8)
-        # Europe: 8 columns
         values += assign_values_for_region("Europe", 8)
-        # Oceania: 7 columns
         values += assign_values_for_region("Oceania", 7)
-        # India: 4 columns
         values += assign_values_for_region("India", 4)
-
         return values
-
-    def open_company_generator(self):
-        for widget in self.root.winfo_children():
-            widget.destroy()
-        title_label = ttk.Label(self.root, text="Company Generator", font=("Helvetica", 16))
-        title_label.pack(pady=10)
-        add_company_btn = ttk.Button(self.root, text="Add Company", command=self.add_company_form)
-        add_company_btn.pack(pady=10)
-        self.companies_frame = ttk.Frame(self.root)
-        self.companies_frame.pack(fill="both", expand=True, padx=10, pady=10)
-        self.status_label = ttk.Label(self.root, text="Status: Waiting to generate companies...")
-        self.status_label.pack(pady=10)
-        generate_btn = ttk.Button(self.root, text="Generate Companies", command=self.generate_companies)
-        generate_btn.pack(side="bottom", pady=10)
-        back_btn = ttk.Button(self.root, text="Back", command=self.setup_main_menu)
-        back_btn.pack(side="bottom", pady=10)
 
     def ensure_byte(self, value):
         return max(0, min(255, int(value)))
-
-    def add_years(self, d, years):
-        try:
-            return d.replace(year=d.year + years)
-        except ValueError:
-            return d.replace(month=2, day=28, year=d.year + years)
-
-    def random_date(self, start_date, end_date):
-        delta = end_date - start_date
-        int_delta = delta.days
-        if int_delta <= 0:
-            return start_date
-        random_day = random.randrange(int_delta)
-        return start_date + datetime.timedelta(days=random_day)
-
-    def generate_birthday(self, max_year=2007):
-        start_date = datetime.datetime(1970, 1, 1)
-        end_date = datetime.datetime(max_year, 12, 31)
-        return self.random_date(start_date, end_date)
 
     def generate_name(self, description=None, gender=None):
         prompt = "Generate a full name for a professional wrestler."
@@ -1329,6 +1382,13 @@ class WrestleverseApp:
         pictures_entry.pack(pady=5)
         browse_pics_btn = ttk.Button(self.root, text="Browse", command=self.browse_pictures_path)
         browse_pics_btn.pack(pady=5)
+
+        # New setting: Start Date
+        start_date_label = ttk.Label(self.root, text="Start Date (YYYY-MM-DD):")
+        start_date_label.pack(pady=5)
+        self.start_date_var = tk.StringVar(value=self.start_date_str)
+        start_date_entry = ttk.Entry(self.root, textvariable=self.start_date_var, width=15)
+        start_date_entry.pack(pady=5)
         
         save_btn = ttk.Button(self.root, text="Save", command=self.save_settings)
         save_btn.pack(pady=10)
@@ -1346,12 +1406,14 @@ class WrestleverseApp:
         self.bio_prompt = self.bio_prompt_var.get()
         self.access_db_path = self.access_db_var.get()
         self.pictures_path = self.pictures_var.get()
+        self.start_date_str = self.start_date_var.get()
         settings = {
             "api_key": self.api_key,
             "uid_start": self.uid_start,
             "bio_prompt": self.bio_prompt,
             "access_db_path": self.access_db_path,
-            "pictures_path": self.pictures_path
+            "pictures_path": self.pictures_path,
+            "start_date": self.start_date_str
         }
         with open("settings.json", "w") as settings_file:
             json.dump(settings, settings_file)
@@ -1370,12 +1432,14 @@ class WrestleverseApp:
                 self.bio_prompt = settings.get("bio_prompt", "Create a biography for a professional wrestler.")
                 self.access_db_path = settings.get("access_db_path", "")
                 self.pictures_path = settings.get("pictures_path", "")
+                self.start_date_str = settings.get("start_date", "")
         except FileNotFoundError:
             self.api_key = ""
             self.uid_start = 1
             self.bio_prompt = "Create a biography for a professional wrestler."
             self.access_db_path = ""
             self.pictures_path = ""
+            self.start_date_str = ""
 
     def open_skill_presets(self):
         for widget in self.root.winfo_children():
@@ -1660,10 +1724,7 @@ class WrestleverseApp:
                 companies = cursor.fetchall()
                 conn.close()
                 
-                logging.debug(f"Retrieved companies from database: {companies}")
                 company_list = [(int(company[0]), company[1]) for company in companies]
-                logging.debug(f"Converted company list: {company_list}")
-                
                 return company_list
             except Exception as e:
                 logging.error(f"Error getting companies: {e}", exc_info=True)
@@ -1671,8 +1732,6 @@ class WrestleverseApp:
         return []
 
     def generate_contract(self, worker_data, worker_uid, company_choice, contract_uid):
-        logging.debug(f"Generating contract for worker {worker_uid} with company choice: '{company_choice}'")
-        
         companies = self.get_companies()
         fed_uid = None
         
@@ -1680,19 +1739,14 @@ class WrestleverseApp:
             if company_choice == "Random":
                 company = random.choice(companies)
                 fed_uid = company[0]
-                logging.debug(f"Random company selected: {company[1]} (UID: {fed_uid})")
             elif company_choice == "Freelancer":
-                logging.debug("Freelancer selected - no contract needed")
                 return None
             else:
                 for company in companies:
                     if company[1] == company_choice:
                         fed_uid = company[0]
-                        logging.debug(f"Found exact matching company: {company[1]} (UID: {fed_uid})")
                         break
-                
                 if fed_uid is None:
-                    logging.error(f"No matching company found for: {company_choice}")
                     return None
 
         alignment_prompt = f"For a wrestler named {worker_data['name']}, should they be face or heel? Answer with 'face' or 'heel'."
@@ -1702,24 +1756,16 @@ class WrestleverseApp:
                 messages=[{"role": "user", "content": alignment_prompt}]
             )
             alignment = response.choices[0].message.content.strip().lower()
-            is_face = alignment == "face"
-        except Exception as e:
-            logging.error(f"Error getting alignment from GPT: {e}", exc_info=True)
+            is_face = (alignment == "face")
+        except:
             is_face = random.choice([True, False])
 
-        try:
-            contract_began = datetime.datetime(
-                random.randint(2010, 2022),
-                random.randint(1, 12),
-                random.randint(1, 28)
-            )
-            
-            contract_debut = datetime.datetime(1900, 1, 1)
-            
-        except ValueError as e:
-            logging.error(f"Error generating dates: {e}")
-            contract_began = datetime.datetime(2020, 1, 1)
-            contract_debut = datetime.datetime(1900, 1, 1)
+        contract_began_year = self.start_date.year - random.randint(1,5)
+        contract_began_month = random.randint(1,12)
+        contract_began_day = random.randint(1,28)
+        contract_began = datetime.datetime(contract_began_year, contract_began_month, contract_began_day)
+        if contract_began >= self.start_date:
+            contract_began = self.start_date - datetime.timedelta(days=60)
 
         exclusive_choice = worker_data.get('exclusive', 'Random')
         is_exclusive = random.choice([True, False]) if exclusive_choice == 'Random' else exclusive_choice == 'Yes'
@@ -1755,7 +1801,7 @@ class WrestleverseApp:
             "Daysleft": random.randint(7, 300),
             "Dateslength": 0,
             "DatesLeft": 0,
-            "ContractDebutDate": contract_debut,
+            "ContractDebutDate": datetime.datetime(1900, 1, 1),
             "Amount": -1,
             "Downside": -1,
             "Brand": 0,
@@ -1800,15 +1846,11 @@ class WrestleverseApp:
                 messages=[{"role": "user", "content": prompt}]
             )
             race_str = response.choices[0].message.content.strip()
-            try:
-                race = int(race_str)
-                if 1 <= race <= 9:
-                    return race
-            except ValueError:
-                pass
+            race = int(race_str)
+            if 1 <= race <= 9:
+                return race
             return 9
-        except Exception as e:
-            logging.error(f"Error getting race from GPT: {e}", exc_info=True)
+        except:
             return 9
 
     def get_response_from_gpt(self, prompt):
@@ -1973,7 +2015,7 @@ class WrestleverseApp:
                         f"Professional wrestling company logo for \"{company_name}\". "
                         f"Company description: {description}. "
                         "The logo should be professional, memorable, and include the company name. "
-                        "Use a transparent or solid background. Make it bold and striking."
+                        "Use a transparent or solid background."
                     )
                     
                     response = self.client.images.generate(
