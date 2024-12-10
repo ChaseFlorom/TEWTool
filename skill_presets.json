@@ -1,509 +1,2875 @@
 [
-    {
-        "name": "Default",
-        "skills": {
-            "Brawl": {
-                "min": 21,
-                "max": 90
-            },
-            "Air": {
-                "min": 20,
-                "max": 90
-            },
-            "Technical": {
-                "min": 20,
-                "max": 90
-            },
-            "Power": {
-                "min": 20,
-                "max": 90
-            },
-            "Athletic": {
-                "min": 20,
-                "max": 90
-            },
-            "Stamina": {
-                "min": 20,
-                "max": 90
-            },
-            "Psych": {
-                "min": 20,
-                "max": 90
-            },
-            "Basics": {
-                "min": 20,
-                "max": 90
-            },
-            "Tough": {
-                "min": 20,
-                "max": 90
-            },
-            "Sell": {
-                "min": 20,
-                "max": 90
-            },
-            "Charisma": {
-                "min": 20,
-                "max": 90
-            },
-            "Mic": {
-                "min": 20,
-                "max": 90
-            },
-            "Menace": {
-                "min": 20,
-                "max": 90
-            },
-            "Respect": {
-                "min": 100,
-                "max": 100
-            },
-            "Reputation": {
-                "min": 100,
-                "max": 100
-            },
-            "Safety": {
-                "min": 20,
-                "max": 90
-            },
-            "Looks": {
-                "min": 20,
-                "max": 90
-            },
-            "Star": {
-                "min": 20,
-                "max": 90
-            },
-            "Consistency": {
-                "min": 20,
-                "max": 90
-            },
-            "Act": {
-                "min": 20,
-                "max": 90
-            },
-            "Injury": {
-                "min": 20,
-                "max": 90
-            },
-            "Puroresu": {
-                "min": 20,
-                "max": 90
-            },
-            "Flash": {
-                "min": 20,
-                "max": 90
-            },
-            "Hardcore": {
-                "min": 20,
-                "max": 90
-            },
-            "Announcing": {
-                "min": 0,
-                "max": 0
-            },
-            "Colour": {
-                "min": 0,
-                "max": 0
-            },
-            "Refereeing": {
-                "min": 0,
-                "max": 0
-            },
-            "Experience": {
-                "min": 100,
-                "max": 100
-            },
-            "PotentialPrimary": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialMental": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialPerformance": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialFundamental": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialPhysical": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialAnnouncing": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialColour": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialRefereeing": {
-                "min": 0,
-                "max": 0
-            },
-            "ScoutRing": {
-                "min": 6,
-                "max": 6
-            },
-            "ScoutPhysical": {
-                "min": 6,
-                "max": 6
-            },
-            "ScoutEnt": {
-                "min": 6,
-                "max": 6
-            },
-            "ScoutBroadcast": {
-                "min": 6,
-                "max": 6
-            },
-            "ScoutRef": {
-                "min": 6,
-                "max": 6
-            }
-        }
-    },
-    {
-        "name": "Moviestar",
-        "skills": {
-            "Brawl": {
-                "min": 40,
-                "max": 70
-            },
-            "Air": {
-                "min": 20,
-                "max": 40
-            },
-            "Technical": {
-                "min": 20,
-                "max": 30
-            },
-            "Power": {
-                "min": 20,
-                "max": 60
-            },
-            "Athletic": {
-                "min": 20,
-                "max": 75
-            },
-            "Stamina": {
-                "min": 20,
-                "max": 90
-            },
-            "Psych": {
-                "min": 20,
-                "max": 47
-            },
-            "Basics": {
-                "min": 20,
-                "max": 90
-            },
-            "Tough": {
-                "min": 20,
-                "max": 90
-            },
-            "Sell": {
-                "min": 20,
-                "max": 90
-            },
-            "Charisma": {
-                "min": 59,
-                "max": 99
-            },
-            "Mic": {
-                "min": 59,
-                "max": 99
-            },
-            "Menace": {
-                "min": 20,
-                "max": 90
-            },
-            "Respect": {
-                "min": 100,
-                "max": 100
-            },
-            "Reputation": {
-                "min": 100,
-                "max": 100
-            },
-            "Safety": {
-                "min": 20,
-                "max": 90
-            },
-            "Looks": {
-                "min": 60,
-                "max": 90
-            },
-            "Star": {
-                "min": 77,
-                "max": 90
-            },
-            "Consistency": {
-                "min": 20,
-                "max": 90
-            },
-            "Act": {
-                "min": 20,
-                "max": 90
-            },
-            "Injury": {
-                "min": 20,
-                "max": 90
-            },
-            "Puroresu": {
-                "min": 20,
-                "max": 90
-            },
-            "Flash": {
-                "min": 55,
-                "max": 90
-            },
-            "Hardcore": {
-                "min": 20,
-                "max": 90
-            },
-            "Announcing": {
-                "min": 0,
-                "max": 0
-            },
-            "Colour": {
-                "min": 0,
-                "max": 0
-            },
-            "Refereeing": {
-                "min": 0,
-                "max": 0
-            },
-            "Experience": {
-                "min": 100,
-                "max": 100
-            },
-            "PotentialPrimary": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialMental": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialPerformance": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialFundamental": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialPhysical": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialAnnouncing": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialColour": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialRefereeing": {
-                "min": 0,
-                "max": 0
-            },
-            "ScoutRing": {
-                "min": 6,
-                "max": 6
-            },
-            "ScoutPhysical": {
-                "min": 6,
-                "max": 6
-            },
-            "ScoutEnt": {
-                "min": 6,
-                "max": 6
-            },
-            "ScoutBroadcast": {
-                "min": 6,
-                "max": 6
-            },
-            "ScoutRef": {
-                "min": 6,
-                "max": 6
-            }
-        }
-    },
-    {
-        "name": "Mountain",
-        "skills": {
-            "Brawl": {
-                "min": 60,
-                "max": 90
-            },
-            "Air": {
-                "min": 20,
-                "max": 40
-            },
-            "Technical": {
-                "min": 20,
-                "max": 77
-            },
-            "Power": {
-                "min": 58,
-                "max": 90
-            },
-            "Athletic": {
-                "min": 44,
-                "max": 90
-            },
-            "Stamina": {
-                "min": 20,
-                "max": 80
-            },
-            "Psych": {
-                "min": 20,
-                "max": 90
-            },
-            "Basics": {
-                "min": 20,
-                "max": 90
-            },
-            "Tough": {
-                "min": 44,
-                "max": 90
-            },
-            "Sell": {
-                "min": 20,
-                "max": 90
-            },
-            "Charisma": {
-                "min": 20,
-                "max": 90
-            },
-            "Mic": {
-                "min": 20,
-                "max": 90
-            },
-            "Menace": {
-                "min": 44,
-                "max": 90
-            },
-            "Respect": {
-                "min": 100,
-                "max": 100
-            },
-            "Reputation": {
-                "min": 100,
-                "max": 100
-            },
-            "Safety": {
-                "min": 20,
-                "max": 90
-            },
-            "Looks": {
-                "min": 20,
-                "max": 77
-            },
-            "Star": {
-                "min": 44,
-                "max": 88
-            },
-            "Consistency": {
-                "min": 20,
-                "max": 90
-            },
-            "Act": {
-                "min": 20,
-                "max": 90
-            },
-            "Injury": {
-                "min": 20,
-                "max": 90
-            },
-            "Puroresu": {
-                "min": 20,
-                "max": 90
-            },
-            "Flash": {
-                "min": 20,
-                "max": 90
-            },
-            "Hardcore": {
-                "min": 20,
-                "max": 90
-            },
-            "Announcing": {
-                "min": 0,
-                "max": 0
-            },
-            "Colour": {
-                "min": 0,
-                "max": 0
-            },
-            "Refereeing": {
-                "min": 0,
-                "max": 0
-            },
-            "Experience": {
-                "min": 100,
-                "max": 100
-            },
-            "PotentialPrimary": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialMental": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialPerformance": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialFundamental": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialPhysical": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialAnnouncing": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialColour": {
-                "min": 0,
-                "max": 0
-            },
-            "PotentialRefereeing": {
-                "min": 0,
-                "max": 0
-            },
-            "ScoutRing": {
-                "min": 6,
-                "max": 6
-            },
-            "ScoutPhysical": {
-                "min": 6,
-                "max": 6
-            },
-            "ScoutEnt": {
-                "min": 6,
-                "max": 6
-            },
-            "ScoutBroadcast": {
-                "min": 6,
-                "max": 6
-            },
-            "ScoutRef": {
-                "min": 6,
-                "max": 6
-            }
-        }
+  {
+    "name": "Default",
+    "skills": {
+      "Brawl": {
+        "min": 21,
+        "max": 90
+      },
+      "Air": {
+        "min": 20,
+        "max": 90
+      },
+      "Technical": {
+        "min": 20,
+        "max": 90
+      },
+      "Power": {
+        "min": 20,
+        "max": 90
+      },
+      "Athletic": {
+        "min": 20,
+        "max": 90
+      },
+      "Stamina": {
+        "min": 20,
+        "max": 90
+      },
+      "Psych": {
+        "min": 20,
+        "max": 90
+      },
+      "Basics": {
+        "min": 20,
+        "max": 90
+      },
+      "Tough": {
+        "min": 20,
+        "max": 90
+      },
+      "Sell": {
+        "min": 20,
+        "max": 90
+      },
+      "Charisma": {
+        "min": 20,
+        "max": 90
+      },
+      "Mic": {
+        "min": 20,
+        "max": 90
+      },
+      "Menace": {
+        "min": 20,
+        "max": 90
+      },
+      "Respect": {
+        "min": 100,
+        "max": 100
+      },
+      "Reputation": {
+        "min": 100,
+        "max": 100
+      },
+      "Safety": {
+        "min": 20,
+        "max": 90
+      },
+      "Looks": {
+        "min": 20,
+        "max": 90
+      },
+      "Star": {
+        "min": 20,
+        "max": 90
+      },
+      "Consistency": {
+        "min": 20,
+        "max": 90
+      },
+      "Act": {
+        "min": 20,
+        "max": 90
+      },
+      "Injury": {
+        "min": 20,
+        "max": 90
+      },
+      "Puroresu": {
+        "min": 20,
+        "max": 90
+      },
+      "Flash": {
+        "min": 20,
+        "max": 90
+      },
+      "Hardcore": {
+        "min": 20,
+        "max": 90
+      },
+      "Announcing": {
+        "min": 0,
+        "max": 0
+      },
+      "Colour": {
+        "min": 0,
+        "max": 0
+      },
+      "Refereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "Experience": {
+        "min": 100,
+        "max": 100
+      },
+      "PotentialPrimary": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialMental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPerformance": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialFundamental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPhysical": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialAnnouncing": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialColour": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialRefereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "ScoutRing": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutPhysical": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutEnt": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutBroadcast": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutRef": {
+        "min": 6,
+        "max": 6
+      }
     }
+  },
+  {
+    "name": "Moviestar",
+    "skills": {
+      "Brawl": {
+        "min": 40,
+        "max": 70
+      },
+      "Air": {
+        "min": 20,
+        "max": 40
+      },
+      "Technical": {
+        "min": 20,
+        "max": 30
+      },
+      "Power": {
+        "min": 20,
+        "max": 60
+      },
+      "Athletic": {
+        "min": 20,
+        "max": 75
+      },
+      "Stamina": {
+        "min": 20,
+        "max": 90
+      },
+      "Psych": {
+        "min": 20,
+        "max": 47
+      },
+      "Basics": {
+        "min": 20,
+        "max": 90
+      },
+      "Tough": {
+        "min": 20,
+        "max": 90
+      },
+      "Sell": {
+        "min": 20,
+        "max": 90
+      },
+      "Charisma": {
+        "min": 59,
+        "max": 99
+      },
+      "Mic": {
+        "min": 59,
+        "max": 99
+      },
+      "Menace": {
+        "min": 20,
+        "max": 90
+      },
+      "Respect": {
+        "min": 100,
+        "max": 100
+      },
+      "Reputation": {
+        "min": 100,
+        "max": 100
+      },
+      "Safety": {
+        "min": 20,
+        "max": 90
+      },
+      "Looks": {
+        "min": 60,
+        "max": 90
+      },
+      "Star": {
+        "min": 77,
+        "max": 90
+      },
+      "Consistency": {
+        "min": 20,
+        "max": 90
+      },
+      "Act": {
+        "min": 20,
+        "max": 90
+      },
+      "Injury": {
+        "min": 20,
+        "max": 90
+      },
+      "Puroresu": {
+        "min": 20,
+        "max": 90
+      },
+      "Flash": {
+        "min": 55,
+        "max": 90
+      },
+      "Hardcore": {
+        "min": 20,
+        "max": 90
+      },
+      "Announcing": {
+        "min": 0,
+        "max": 0
+      },
+      "Colour": {
+        "min": 0,
+        "max": 0
+      },
+      "Refereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "Experience": {
+        "min": 100,
+        "max": 100
+      },
+      "PotentialPrimary": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialMental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPerformance": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialFundamental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPhysical": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialAnnouncing": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialColour": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialRefereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "ScoutRing": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutPhysical": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutEnt": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutBroadcast": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutRef": {
+        "min": 6,
+        "max": 6
+      }
+    }
+  },
+  {
+    "name": "Mountain",
+    "skills": {
+      "Brawl": {
+        "min": 60,
+        "max": 90
+      },
+      "Air": {
+        "min": 20,
+        "max": 40
+      },
+      "Technical": {
+        "min": 20,
+        "max": 77
+      },
+      "Power": {
+        "min": 58,
+        "max": 90
+      },
+      "Athletic": {
+        "min": 44,
+        "max": 90
+      },
+      "Stamina": {
+        "min": 20,
+        "max": 80
+      },
+      "Psych": {
+        "min": 20,
+        "max": 90
+      },
+      "Basics": {
+        "min": 20,
+        "max": 90
+      },
+      "Tough": {
+        "min": 44,
+        "max": 90
+      },
+      "Sell": {
+        "min": 20,
+        "max": 90
+      },
+      "Charisma": {
+        "min": 20,
+        "max": 90
+      },
+      "Mic": {
+        "min": 20,
+        "max": 90
+      },
+      "Menace": {
+        "min": 44,
+        "max": 90
+      },
+      "Respect": {
+        "min": 100,
+        "max": 100
+      },
+      "Reputation": {
+        "min": 100,
+        "max": 100
+      },
+      "Safety": {
+        "min": 20,
+        "max": 90
+      },
+      "Looks": {
+        "min": 20,
+        "max": 77
+      },
+      "Star": {
+        "min": 44,
+        "max": 88
+      },
+      "Consistency": {
+        "min": 20,
+        "max": 90
+      },
+      "Act": {
+        "min": 20,
+        "max": 90
+      },
+      "Injury": {
+        "min": 20,
+        "max": 90
+      },
+      "Puroresu": {
+        "min": 20,
+        "max": 90
+      },
+      "Flash": {
+        "min": 20,
+        "max": 90
+      },
+      "Hardcore": {
+        "min": 20,
+        "max": 90
+      },
+      "Announcing": {
+        "min": 0,
+        "max": 0
+      },
+      "Colour": {
+        "min": 0,
+        "max": 0
+      },
+      "Refereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "Experience": {
+        "min": 100,
+        "max": 100
+      },
+      "PotentialPrimary": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialMental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPerformance": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialFundamental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPhysical": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialAnnouncing": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialColour": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialRefereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "ScoutRing": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutPhysical": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutEnt": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutBroadcast": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutRef": {
+        "min": 6,
+        "max": 6
+      }
+    }
+  },
+  {
+    "name": "Luchador",
+    "skills": {
+      "Brawl": {
+        "min": 20,
+        "max": 80
+      },
+      "Air": {
+        "min": 60,
+        "max": 100
+      },
+      "Technical": {
+        "min": 30,
+        "max": 70
+      },
+      "Power": {
+        "min": 10,
+        "max": 50
+      },
+      "Athletic": {
+        "min": 60,
+        "max": 100
+      },
+      "Stamina": {
+        "min": 50,
+        "max": 90
+      },
+      "Psych": {
+        "min": 20,
+        "max": 70
+      },
+      "Basics": {
+        "min": 30,
+        "max": 80
+      },
+      "Tough": {
+        "min": 20,
+        "max": 70
+      },
+      "Sell": {
+        "min": 30,
+        "max": 90
+      },
+      "Charisma": {
+        "min": 40,
+        "max": 90
+      },
+      "Mic": {
+        "min": 20,
+        "max": 70
+      },
+      "Menace": {
+        "min": 10,
+        "max": 60
+      },
+      "Respect": {
+        "min": 100,
+        "max": 100
+      },
+      "Reputation": {
+        "min": 100,
+        "max": 100
+      },
+      "Safety": {
+        "min": 20,
+        "max": 90
+      },
+      "Looks": {
+        "min": 20,
+        "max": 90
+      },
+      "Star": {
+        "min": 30,
+        "max": 90
+      },
+      "Consistency": {
+        "min": 20,
+        "max": 90
+      },
+      "Act": {
+        "min": 20,
+        "max": 90
+      },
+      "Injury": {
+        "min": 20,
+        "max": 90
+      },
+      "Puroresu": {
+        "min": 20,
+        "max": 90
+      },
+      "Flash": {
+        "min": 60,
+        "max": 100
+      },
+      "Hardcore": {
+        "min": 20,
+        "max": 60
+      },
+      "Announcing": {
+        "min": 0,
+        "max": 0
+      },
+      "Colour": {
+        "min": 0,
+        "max": 0
+      },
+      "Refereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "Experience": {
+        "min": 100,
+        "max": 100
+      },
+      "PotentialPrimary": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialMental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPerformance": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialFundamental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPhysical": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialAnnouncing": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialColour": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialRefereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "ScoutRing": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutPhysical": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutEnt": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutBroadcast": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutRef": {
+        "min": 6,
+        "max": 6
+      }
+    }
+  },
+  {
+    "name": "Manager",
+    "skills": {
+      "Brawl": {
+        "min": 1,
+        "max": 20
+      },
+      "Air": {
+        "min": 1,
+        "max": 10
+      },
+      "Technical": {
+        "min": 1,
+        "max": 20
+      },
+      "Power": {
+        "min": 1,
+        "max": 20
+      },
+      "Athletic": {
+        "min": 1,
+        "max": 20
+      },
+      "Stamina": {
+        "min": 1,
+        "max": 20
+      },
+      "Psych": {
+        "min": 40,
+        "max": 90
+      },
+      "Basics": {
+        "min": 10,
+        "max": 50
+      },
+      "Tough": {
+        "min": 10,
+        "max": 40
+      },
+      "Sell": {
+        "min": 10,
+        "max": 50
+      },
+      "Charisma": {
+        "min": 70,
+        "max": 100
+      },
+      "Mic": {
+        "min": 70,
+        "max": 100
+      },
+      "Menace": {
+        "min": 20,
+        "max": 70
+      },
+      "Respect": {
+        "min": 100,
+        "max": 100
+      },
+      "Reputation": {
+        "min": 100,
+        "max": 100
+      },
+      "Safety": {
+        "min": 20,
+        "max": 90
+      },
+      "Looks": {
+        "min": 40,
+        "max": 90
+      },
+      "Star": {
+        "min": 50,
+        "max": 100
+      },
+      "Consistency": {
+        "min": 20,
+        "max": 90
+      },
+      "Act": {
+        "min": 50,
+        "max": 100
+      },
+      "Injury": {
+        "min": 20,
+        "max": 90
+      },
+      "Puroresu": {
+        "min": 1,
+        "max": 20
+      },
+      "Flash": {
+        "min": 20,
+        "max": 70
+      },
+      "Hardcore": {
+        "min": 1,
+        "max": 20
+      },
+      "Announcing": {
+        "min": 0,
+        "max": 0
+      },
+      "Colour": {
+        "min": 0,
+        "max": 0
+      },
+      "Refereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "Experience": {
+        "min": 100,
+        "max": 100
+      },
+      "PotentialPrimary": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialMental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPerformance": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialFundamental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPhysical": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialAnnouncing": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialColour": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialRefereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "ScoutRing": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutPhysical": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutEnt": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutBroadcast": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutRef": {
+        "min": 6,
+        "max": 6
+      }
+    }
+  },
+  {
+    "name": "Owner Nonwrestler",
+    "skills": {
+      "Brawl": {
+        "min": 1,
+        "max": 10
+      },
+      "Air": {
+        "min": 1,
+        "max": 10
+      },
+      "Technical": {
+        "min": 1,
+        "max": 10
+      },
+      "Power": {
+        "min": 1,
+        "max": 10
+      },
+      "Athletic": {
+        "min": 1,
+        "max": 10
+      },
+      "Stamina": {
+        "min": 10,
+        "max": 30
+      },
+      "Psych": {
+        "min": 60,
+        "max": 100
+      },
+      "Basics": {
+        "min": 10,
+        "max": 40
+      },
+      "Tough": {
+        "min": 10,
+        "max": 30
+      },
+      "Sell": {
+        "min": 10,
+        "max": 30
+      },
+      "Charisma": {
+        "min": 50,
+        "max": 100
+      },
+      "Mic": {
+        "min": 50,
+        "max": 100
+      },
+      "Menace": {
+        "min": 10,
+        "max": 50
+      },
+      "Respect": {
+        "min": 100,
+        "max": 100
+      },
+      "Reputation": {
+        "min": 100,
+        "max": 100
+      },
+      "Safety": {
+        "min": 10,
+        "max": 50
+      },
+      "Looks": {
+        "min": 20,
+        "max": 80
+      },
+      "Star": {
+        "min": 40,
+        "max": 90
+      },
+      "Consistency": {
+        "min": 20,
+        "max": 90
+      },
+      "Act": {
+        "min": 30,
+        "max": 90
+      },
+      "Injury": {
+        "min": 10,
+        "max": 50
+      },
+      "Puroresu": {
+        "min": 1,
+        "max": 10
+      },
+      "Flash": {
+        "min": 10,
+        "max": 50
+      },
+      "Hardcore": {
+        "min": 1,
+        "max": 10
+      },
+      "Announcing": {
+        "min": 0,
+        "max": 0
+      },
+      "Colour": {
+        "min": 0,
+        "max": 0
+      },
+      "Refereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "Experience": {
+        "min": 100,
+        "max": 100
+      },
+      "PotentialPrimary": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialMental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPerformance": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialFundamental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPhysical": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialAnnouncing": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialColour": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialRefereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "ScoutRing": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutPhysical": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutEnt": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutBroadcast": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutRef": {
+        "min": 6,
+        "max": 6
+      }
+    }
+  },
+  {
+    "name": "Striker",
+    "skills": {
+      "Brawl": {
+        "min": 50,
+        "max": 100
+      },
+      "Air": {
+        "min": 10,
+        "max": 40
+      },
+      "Technical": {
+        "min": 20,
+        "max": 70
+      },
+      "Power": {
+        "min": 30,
+        "max": 80
+      },
+      "Athletic": {
+        "min": 20,
+        "max": 80
+      },
+      "Stamina": {
+        "min": 40,
+        "max": 90
+      },
+      "Psych": {
+        "min": 30,
+        "max": 90
+      },
+      "Basics": {
+        "min": 30,
+        "max": 90
+      },
+      "Tough": {
+        "min": 50,
+        "max": 100
+      },
+      "Sell": {
+        "min": 20,
+        "max": 80
+      },
+      "Charisma": {
+        "min": 20,
+        "max": 80
+      },
+      "Mic": {
+        "min": 20,
+        "max": 70
+      },
+      "Menace": {
+        "min": 30,
+        "max": 90
+      },
+      "Respect": {
+        "min": 100,
+        "max": 100
+      },
+      "Reputation": {
+        "min": 100,
+        "max": 100
+      },
+      "Safety": {
+        "min": 20,
+        "max": 90
+      },
+      "Looks": {
+        "min": 20,
+        "max": 80
+      },
+      "Star": {
+        "min": 20,
+        "max": 80
+      },
+      "Consistency": {
+        "min": 20,
+        "max": 90
+      },
+      "Act": {
+        "min": 20,
+        "max": 70
+      },
+      "Injury": {
+        "min": 20,
+        "max": 90
+      },
+      "Puroresu": {
+        "min": 20,
+        "max": 70
+      },
+      "Flash": {
+        "min": 20,
+        "max": 60
+      },
+      "Hardcore": {
+        "min": 30,
+        "max": 90
+      },
+      "Announcing": {
+        "min": 0,
+        "max": 0
+      },
+      "Colour": {
+        "min": 0,
+        "max": 0
+      },
+      "Refereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "Experience": {
+        "min": 100,
+        "max": 100
+      },
+      "PotentialPrimary": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialMental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPerformance": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialFundamental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPhysical": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialAnnouncing": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialColour": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialRefereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "ScoutRing": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutPhysical": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutEnt": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutBroadcast": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutRef": {
+        "min": 6,
+        "max": 6
+      }
+    }
+  },
+  {
+    "name": "Bruiser",
+    "skills": {
+      "Brawl": {
+        "min": 60,
+        "max": 100
+      },
+      "Air": {
+        "min": 10,
+        "max": 30
+      },
+      "Technical": {
+        "min": 20,
+        "max": 60
+      },
+      "Power": {
+        "min": 60,
+        "max": 100
+      },
+      "Athletic": {
+        "min": 20,
+        "max": 70
+      },
+      "Stamina": {
+        "min": 40,
+        "max": 90
+      },
+      "Psych": {
+        "min": 30,
+        "max": 90
+      },
+      "Basics": {
+        "min": 30,
+        "max": 90
+      },
+      "Tough": {
+        "min": 60,
+        "max": 100
+      },
+      "Sell": {
+        "min": 20,
+        "max": 70
+      },
+      "Charisma": {
+        "min": 20,
+        "max": 70
+      },
+      "Mic": {
+        "min": 20,
+        "max": 70
+      },
+      "Menace": {
+        "min": 40,
+        "max": 90
+      },
+      "Respect": {
+        "min": 100,
+        "max": 100
+      },
+      "Reputation": {
+        "min": 100,
+        "max": 100
+      },
+      "Safety": {
+        "min": 20,
+        "max": 90
+      },
+      "Looks": {
+        "min": 20,
+        "max": 70
+      },
+      "Star": {
+        "min": 20,
+        "max": 80
+      },
+      "Consistency": {
+        "min": 20,
+        "max": 90
+      },
+      "Act": {
+        "min": 20,
+        "max": 70
+      },
+      "Injury": {
+        "min": 20,
+        "max": 90
+      },
+      "Puroresu": {
+        "min": 20,
+        "max": 70
+      },
+      "Flash": {
+        "min": 20,
+        "max": 40
+      },
+      "Hardcore": {
+        "min": 30,
+        "max": 100
+      },
+      "Announcing": {
+        "min": 0,
+        "max": 0
+      },
+      "Colour": {
+        "min": 0,
+        "max": 0
+      },
+      "Refereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "Experience": {
+        "min": 100,
+        "max": 100
+      },
+      "PotentialPrimary": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialMental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPerformance": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialFundamental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPhysical": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialAnnouncing": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialColour": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialRefereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "ScoutRing": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutPhysical": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutEnt": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutBroadcast": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutRef": {
+        "min": 6,
+        "max": 6
+      }
+    }
+  },
+  {
+    "name": "Flashy",
+    "skills": {
+      "Brawl": {
+        "min": 20,
+        "max": 70
+      },
+      "Air": {
+        "min": 40,
+        "max": 90
+      },
+      "Technical": {
+        "min": 20,
+        "max": 60
+      },
+      "Power": {
+        "min": 10,
+        "max": 50
+      },
+      "Athletic": {
+        "min": 40,
+        "max": 100
+      },
+      "Stamina": {
+        "min": 20,
+        "max": 80
+      },
+      "Psych": {
+        "min": 20,
+        "max": 70
+      },
+      "Basics": {
+        "min": 20,
+        "max": 80
+      },
+      "Tough": {
+        "min": 20,
+        "max": 60
+      },
+      "Sell": {
+        "min": 30,
+        "max": 90
+      },
+      "Charisma": {
+        "min": 50,
+        "max": 100
+      },
+      "Mic": {
+        "min": 40,
+        "max": 90
+      },
+      "Menace": {
+        "min": 20,
+        "max": 60
+      },
+      "Respect": {
+        "min": 100,
+        "max": 100
+      },
+      "Reputation": {
+        "min": 100,
+        "max": 100
+      },
+      "Safety": {
+        "min": 20,
+        "max": 90
+      },
+      "Looks": {
+        "min": 40,
+        "max": 90
+      },
+      "Star": {
+        "min": 60,
+        "max": 100
+      },
+      "Consistency": {
+        "min": 20,
+        "max": 90
+      },
+      "Act": {
+        "min": 40,
+        "max": 90
+      },
+      "Injury": {
+        "min": 20,
+        "max": 90
+      },
+      "Puroresu": {
+        "min": 20,
+        "max": 60
+      },
+      "Flash": {
+        "min": 70,
+        "max": 100
+      },
+      "Hardcore": {
+        "min": 20,
+        "max": 40
+      },
+      "Announcing": {
+        "min": 0,
+        "max": 0
+      },
+      "Colour": {
+        "min": 0,
+        "max": 0
+      },
+      "Refereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "Experience": {
+        "min": 100,
+        "max": 100
+      },
+      "PotentialPrimary": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialMental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPerformance": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialFundamental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPhysical": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialAnnouncing": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialColour": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialRefereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "ScoutRing": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutPhysical": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutEnt": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutBroadcast": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutRef": {
+        "min": 6,
+        "max": 6
+      }
+    }
+  },
+  {
+    "name": "Technical Wrestler",
+    "skills": {
+      "Brawl": {
+        "min": 20,
+        "max": 60
+      },
+      "Air": {
+        "min": 20,
+        "max": 60
+      },
+      "Technical": {
+        "min": 60,
+        "max": 100
+      },
+      "Power": {
+        "min": 20,
+        "max": 70
+      },
+      "Athletic": {
+        "min": 20,
+        "max": 80
+      },
+      "Stamina": {
+        "min": 50,
+        "max": 100
+      },
+      "Psych": {
+        "min": 40,
+        "max": 90
+      },
+      "Basics": {
+        "min": 60,
+        "max": 100
+      },
+      "Tough": {
+        "min": 30,
+        "max": 80
+      },
+      "Sell": {
+        "min": 30,
+        "max": 90
+      },
+      "Charisma": {
+        "min": 20,
+        "max": 70
+      },
+      "Mic": {
+        "min": 20,
+        "max": 70
+      },
+      "Menace": {
+        "min": 20,
+        "max": 60
+      },
+      "Respect": {
+        "min": 100,
+        "max": 100
+      },
+      "Reputation": {
+        "min": 100,
+        "max": 100
+      },
+      "Safety": {
+        "min": 30,
+        "max": 90
+      },
+      "Looks": {
+        "min": 20,
+        "max": 80
+      },
+      "Star": {
+        "min": 20,
+        "max": 80
+      },
+      "Consistency": {
+        "min": 30,
+        "max": 100
+      },
+      "Act": {
+        "min": 20,
+        "max": 70
+      },
+      "Injury": {
+        "min": 20,
+        "max": 90
+      },
+      "Puroresu": {
+        "min": 60,
+        "max": 100
+      },
+      "Flash": {
+        "min": 20,
+        "max": 70
+      },
+      "Hardcore": {
+        "min": 20,
+        "max": 60
+      },
+      "Announcing": {
+        "min": 0,
+        "max": 0
+      },
+      "Colour": {
+        "min": 0,
+        "max": 0
+      },
+      "Refereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "Experience": {
+        "min": 100,
+        "max": 100
+      },
+      "PotentialPrimary": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialMental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPerformance": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialFundamental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPhysical": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialAnnouncing": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialColour": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialRefereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "ScoutRing": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutPhysical": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutEnt": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutBroadcast": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutRef": {
+        "min": 6,
+        "max": 6
+      }
+    }
+  },
+  {
+    "name": "Grappler",
+    "skills": {
+      "Brawl": {
+        "min": 30,
+        "max": 80
+      },
+      "Air": {
+        "min": 10,
+        "max": 40
+      },
+      "Technical": {
+        "min": 50,
+        "max": 100
+      },
+      "Power": {
+        "min": 30,
+        "max": 80
+      },
+      "Athletic": {
+        "min": 20,
+        "max": 70
+      },
+      "Stamina": {
+        "min": 40,
+        "max": 90
+      },
+      "Psych": {
+        "min": 30,
+        "max": 90
+      },
+      "Basics": {
+        "min": 50,
+        "max": 100
+      },
+      "Tough": {
+        "min": 40,
+        "max": 90
+      },
+      "Sell": {
+        "min": 20,
+        "max": 80
+      },
+      "Charisma": {
+        "min": 20,
+        "max": 70
+      },
+      "Mic": {
+        "min": 20,
+        "max": 70
+      },
+      "Menace": {
+        "min": 20,
+        "max": 60
+      },
+      "Respect": {
+        "min": 100,
+        "max": 100
+      },
+      "Reputation": {
+        "min": 100,
+        "max": 100
+      },
+      "Safety": {
+        "min": 30,
+        "max": 90
+      },
+      "Looks": {
+        "min": 20,
+        "max": 70
+      },
+      "Star": {
+        "min": 20,
+        "max": 80
+      },
+      "Consistency": {
+        "min": 30,
+        "max": 90
+      },
+      "Act": {
+        "min": 20,
+        "max": 70
+      },
+      "Injury": {
+        "min": 20,
+        "max": 90
+      },
+      "Puroresu": {
+        "min": 50,
+        "max": 100
+      },
+      "Flash": {
+        "min": 10,
+        "max": 60
+      },
+      "Hardcore": {
+        "min": 20,
+        "max": 60
+      },
+      "Announcing": {
+        "min": 0,
+        "max": 0
+      },
+      "Colour": {
+        "min": 0,
+        "max": 0
+      },
+      "Refereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "Experience": {
+        "min": 100,
+        "max": 100
+      },
+      "PotentialPrimary": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialMental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPerformance": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialFundamental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPhysical": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialAnnouncing": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialColour": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialRefereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "ScoutRing": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutPhysical": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutEnt": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutBroadcast": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutRef": {
+        "min": 6,
+        "max": 6
+      }
+    }
+  },
+  {
+    "name": "Sumo",
+    "skills": {
+      "Brawl": {
+        "min": 50,
+        "max": 100
+      },
+      "Air": {
+        "min": 1,
+        "max": 20
+      },
+      "Technical": {
+        "min": 20,
+        "max": 60
+      },
+      "Power": {
+        "min": 70,
+        "max": 100
+      },
+      "Athletic": {
+        "min": 20,
+        "max": 60
+      },
+      "Stamina": {
+        "min": 40,
+        "max": 90
+      },
+      "Psych": {
+        "min": 30,
+        "max": 90
+      },
+      "Basics": {
+        "min": 30,
+        "max": 90
+      },
+      "Tough": {
+        "min": 60,
+        "max": 100
+      },
+      "Sell": {
+        "min": 20,
+        "max": 70
+      },
+      "Charisma": {
+        "min": 20,
+        "max": 70
+      },
+      "Mic": {
+        "min": 20,
+        "max": 70
+      },
+      "Menace": {
+        "min": 40,
+        "max": 90
+      },
+      "Respect": {
+        "min": 100,
+        "max": 100
+      },
+      "Reputation": {
+        "min": 100,
+        "max": 100
+      },
+      "Safety": {
+        "min": 20,
+        "max": 90
+      },
+      "Looks": {
+        "min": 20,
+        "max": 60
+      },
+      "Star": {
+        "min": 20,
+        "max": 70
+      },
+      "Consistency": {
+        "min": 20,
+        "max": 90
+      },
+      "Act": {
+        "min": 20,
+        "max": 70
+      },
+      "Injury": {
+        "min": 20,
+        "max": 90
+      },
+      "Puroresu": {
+        "min": 20,
+        "max": 60
+      },
+      "Flash": {
+        "min": 10,
+        "max": 40
+      },
+      "Hardcore": {
+        "min": 20,
+        "max": 60
+      },
+      "Announcing": {
+        "min": 0,
+        "max": 0
+      },
+      "Colour": {
+        "min": 0,
+        "max": 0
+      },
+      "Refereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "Experience": {
+        "min": 100,
+        "max": 100
+      },
+      "PotentialPrimary": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialMental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPerformance": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialFundamental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPhysical": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialAnnouncing": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialColour": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialRefereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "ScoutRing": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutPhysical": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutEnt": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutBroadcast": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutRef": {
+        "min": 6,
+        "max": 6
+      }
+    }
+  },
+  {
+    "name": "Entertainer",
+    "skills": {
+      "Brawl": {
+        "min": 20,
+        "max": 60
+      },
+      "Air": {
+        "min": 20,
+        "max": 60
+      },
+      "Technical": {
+        "min": 20,
+        "max": 60
+      },
+      "Power": {
+        "min": 20,
+        "max": 60
+      },
+      "Athletic": {
+        "min": 20,
+        "max": 80
+      },
+      "Stamina": {
+        "min": 20,
+        "max": 80
+      },
+      "Psych": {
+        "min": 20,
+        "max": 80
+      },
+      "Basics": {
+        "min": 20,
+        "max": 80
+      },
+      "Tough": {
+        "min": 20,
+        "max": 60
+      },
+      "Sell": {
+        "min": 30,
+        "max": 90
+      },
+      "Charisma": {
+        "min": 60,
+        "max": 100
+      },
+      "Mic": {
+        "min": 60,
+        "max": 100
+      },
+      "Menace": {
+        "min": 20,
+        "max": 70
+      },
+      "Respect": {
+        "min": 100,
+        "max": 100
+      },
+      "Reputation": {
+        "min": 100,
+        "max": 100
+      },
+      "Safety": {
+        "min": 20,
+        "max": 90
+      },
+      "Looks": {
+        "min": 50,
+        "max": 100
+      },
+      "Star": {
+        "min": 60,
+        "max": 100
+      },
+      "Consistency": {
+        "min": 20,
+        "max": 90
+      },
+      "Act": {
+        "min": 60,
+        "max": 100
+      },
+      "Injury": {
+        "min": 20,
+        "max": 90
+      },
+      "Puroresu": {
+        "min": 20,
+        "max": 60
+      },
+      "Flash": {
+        "min": 30,
+        "max": 80
+      },
+      "Hardcore": {
+        "min": 20,
+        "max": 60
+      },
+      "Announcing": {
+        "min": 0,
+        "max": 0
+      },
+      "Colour": {
+        "min": 0,
+        "max": 0
+      },
+      "Refereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "Experience": {
+        "min": 100,
+        "max": 100
+      },
+      "PotentialPrimary": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialMental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPerformance": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialFundamental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPhysical": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialAnnouncing": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialColour": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialRefereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "ScoutRing": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutPhysical": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutEnt": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutBroadcast": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutRef": {
+        "min": 6,
+        "max": 6
+      }
+    }
+  },
+  {
+    "name": "Comedy",
+    "skills": {
+      "Brawl": {
+        "min": 20,
+        "max": 50
+      },
+      "Air": {
+        "min": 20,
+        "max": 50
+      },
+      "Technical": {
+        "min": 20,
+        "max": 50
+      },
+      "Power": {
+        "min": 10,
+        "max": 40
+      },
+      "Athletic": {
+        "min": 20,
+        "max": 60
+      },
+      "Stamina": {
+        "min": 20,
+        "max": 70
+      },
+      "Psych": {
+        "min": 20,
+        "max": 80
+      },
+      "Basics": {
+        "min": 20,
+        "max": 70
+      },
+      "Tough": {
+        "min": 20,
+        "max": 60
+      },
+      "Sell": {
+        "min": 30,
+        "max": 90
+      },
+      "Charisma": {
+        "min": 50,
+        "max": 100
+      },
+      "Mic": {
+        "min": 40,
+        "max": 100
+      },
+      "Menace": {
+        "min": 10,
+        "max": 50
+      },
+      "Respect": {
+        "min": 100,
+        "max": 100
+      },
+      "Reputation": {
+        "min": 100,
+        "max": 100
+      },
+      "Safety": {
+        "min": 20,
+        "max": 90
+      },
+      "Looks": {
+        "min": 20,
+        "max": 80
+      },
+      "Star": {
+        "min": 40,
+        "max": 100
+      },
+      "Consistency": {
+        "min": 20,
+        "max": 90
+      },
+      "Act": {
+        "min": 60,
+        "max": 100
+      },
+      "Injury": {
+        "min": 20,
+        "max": 90
+      },
+      "Puroresu": {
+        "min": 20,
+        "max": 50
+      },
+      "Flash": {
+        "min": 20,
+        "max": 70
+      },
+      "Hardcore": {
+        "min": 10,
+        "max": 40
+      },
+      "Announcing": {
+        "min": 0,
+        "max": 0
+      },
+      "Colour": {
+        "min": 0,
+        "max": 0
+      },
+      "Refereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "Experience": {
+        "min": 100,
+        "max": 100
+      },
+      "PotentialPrimary": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialMental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPerformance": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialFundamental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPhysical": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialAnnouncing": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialColour": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialRefereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "ScoutRing": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutPhysical": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutEnt": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutBroadcast": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutRef": {
+        "min": 6,
+        "max": 6
+      }
+    }
+  },
+  {
+    "name": "Psychopath",
+    "skills": {
+      "Brawl": {
+        "min": 40,
+        "max": 90
+      },
+      "Air": {
+        "min": 10,
+        "max": 50
+      },
+      "Technical": {
+        "min": 20,
+        "max": 60
+      },
+      "Power": {
+        "min": 30,
+        "max": 80
+      },
+      "Athletic": {
+        "min": 20,
+        "max": 70
+      },
+      "Stamina": {
+        "min": 30,
+        "max": 90
+      },
+      "Psych": {
+        "min": 40,
+        "max": 100
+      },
+      "Basics": {
+        "min": 20,
+        "max": 80
+      },
+      "Tough": {
+        "min": 40,
+        "max": 90
+      },
+      "Sell": {
+        "min": 20,
+        "max": 70
+      },
+      "Charisma": {
+        "min": 20,
+        "max": 70
+      },
+      "Mic": {
+        "min": 20,
+        "max": 70
+      },
+      "Menace": {
+        "min": 50,
+        "max": 100
+      },
+      "Respect": {
+        "min": 100,
+        "max": 100
+      },
+      "Reputation": {
+        "min": 100,
+        "max": 100
+      },
+      "Safety": {
+        "min": 20,
+        "max": 90
+      },
+      "Looks": {
+        "min": 20,
+        "max": 70
+      },
+      "Star": {
+        "min": 20,
+        "max": 80
+      },
+      "Consistency": {
+        "min": 20,
+        "max": 90
+      },
+      "Act": {
+        "min": 20,
+        "max": 70
+      },
+      "Injury": {
+        "min": 20,
+        "max": 90
+      },
+      "Puroresu": {
+        "min": 20,
+        "max": 60
+      },
+      "Flash": {
+        "min": 20,
+        "max": 60
+      },
+      "Hardcore": {
+        "min": 50,
+        "max": 100
+      },
+      "Announcing": {
+        "min": 0,
+        "max": 0
+      },
+      "Colour": {
+        "min": 0,
+        "max": 0
+      },
+      "Refereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "Experience": {
+        "min": 100,
+        "max": 100
+      },
+      "PotentialPrimary": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialMental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPerformance": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialFundamental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPhysical": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialAnnouncing": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialColour": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialRefereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "ScoutRing": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutPhysical": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutEnt": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutBroadcast": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutRef": {
+        "min": 6,
+        "max": 6
+      }
+    }
+  },
+  {
+    "name": "Daredevil",
+    "skills": {
+      "Brawl": {
+        "min": 20,
+        "max": 70
+      },
+      "Air": {
+        "min": 50,
+        "max": 100
+      },
+      "Technical": {
+        "min": 20,
+        "max": 60
+      },
+      "Power": {
+        "min": 20,
+        "max": 60
+      },
+      "Athletic": {
+        "min": 50,
+        "max": 100
+      },
+      "Stamina": {
+        "min": 30,
+        "max": 90
+      },
+      "Psych": {
+        "min": 20,
+        "max": 80
+      },
+      "Basics": {
+        "min": 20,
+        "max": 80
+      },
+      "Tough": {
+        "min": 30,
+        "max": 90
+      },
+      "Sell": {
+        "min": 30,
+        "max": 90
+      },
+      "Charisma": {
+        "min": 30,
+        "max": 80
+      },
+      "Mic": {
+        "min": 20,
+        "max": 70
+      },
+      "Menace": {
+        "min": 20,
+        "max": 60
+      },
+      "Respect": {
+        "min": 100,
+        "max": 100
+      },
+      "Reputation": {
+        "min": 100,
+        "max": 100
+      },
+      "Safety": {
+        "min": 20,
+        "max": 90
+      },
+      "Looks": {
+        "min": 30,
+        "max": 80
+      },
+      "Star": {
+        "min": 30,
+        "max": 90
+      },
+      "Consistency": {
+        "min": 20,
+        "max": 90
+      },
+      "Act": {
+        "min": 20,
+        "max": 70
+      },
+      "Injury": {
+        "min": 20,
+        "max": 90
+      },
+      "Puroresu": {
+        "min": 20,
+        "max": 70
+      },
+      "Flash": {
+        "min": 60,
+        "max": 100
+      },
+      "Hardcore": {
+        "min": 40,
+        "max": 100
+      },
+      "Announcing": {
+        "min": 0,
+        "max": 0
+      },
+      "Colour": {
+        "min": 0,
+        "max": 0
+      },
+      "Refereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "Experience": {
+        "min": 100,
+        "max": 100
+      },
+      "PotentialPrimary": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialMental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPerformance": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialFundamental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPhysical": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialAnnouncing": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialColour": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialRefereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "ScoutRing": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutPhysical": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutEnt": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutBroadcast": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutRef": {
+        "min": 6,
+        "max": 6
+      }
+    }
+  },
+  {
+    "name": "High-Flyer",
+    "skills": {
+      "Brawl": {
+        "min": 20,
+        "max": 70
+      },
+      "Air": {
+        "min": 70,
+        "max": 100
+      },
+      "Technical": {
+        "min": 30,
+        "max": 70
+      },
+      "Power": {
+        "min": 10,
+        "max": 50
+      },
+      "Athletic": {
+        "min": 70,
+        "max": 100
+      },
+      "Stamina": {
+        "min": 40,
+        "max": 90
+      },
+      "Psych": {
+        "min": 20,
+        "max": 70
+      },
+      "Basics": {
+        "min": 30,
+        "max": 80
+      },
+      "Tough": {
+        "min": 20,
+        "max": 70
+      },
+      "Sell": {
+        "min": 30,
+        "max": 90
+      },
+      "Charisma": {
+        "min": 40,
+        "max": 90
+      },
+      "Mic": {
+        "min": 20,
+        "max": 70
+      },
+      "Menace": {
+        "min": 10,
+        "max": 60
+      },
+      "Respect": {
+        "min": 100,
+        "max": 100
+      },
+      "Reputation": {
+        "min": 100,
+        "max": 100
+      },
+      "Safety": {
+        "min": 20,
+        "max": 90
+      },
+      "Looks": {
+        "min": 20,
+        "max": 90
+      },
+      "Star": {
+        "min": 30,
+        "max": 90
+      },
+      "Consistency": {
+        "min": 20,
+        "max": 90
+      },
+      "Act": {
+        "min": 20,
+        "max": 90
+      },
+      "Injury": {
+        "min": 20,
+        "max": 90
+      },
+      "Puroresu": {
+        "min": 20,
+        "max": 80
+      },
+      "Flash": {
+        "min": 60,
+        "max": 100
+      },
+      "Hardcore": {
+        "min": 20,
+        "max": 60
+      },
+      "Announcing": {
+        "min": 0,
+        "max": 0
+      },
+      "Colour": {
+        "min": 0,
+        "max": 0
+      },
+      "Refereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "Experience": {
+        "min": 100,
+        "max": 100
+      },
+      "PotentialPrimary": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialMental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPerformance": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialFundamental": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialPhysical": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialAnnouncing": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialColour": {
+        "min": 0,
+        "max": 0
+      },
+      "PotentialRefereeing": {
+        "min": 0,
+        "max": 0
+      },
+      "ScoutRing": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutPhysical": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutEnt": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutBroadcast": {
+        "min": 6,
+        "max": 6
+      },
+      "ScoutRef": {
+        "min": 6,
+        "max": 6
+      }
+    }
+  }
 ]

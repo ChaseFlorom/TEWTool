@@ -105,6 +105,7 @@ class WrestleverseApp:
                 result = cursor.fetchone()
                 last_uid = result[0] if result[0] else 0
                 uid = last_uid + 1
+                conn.close()
 
             companies_data = []
             bio_data = []
@@ -485,6 +486,7 @@ class WrestleverseApp:
                 result = cursor.fetchone()
                 last_contract_uid = result[0] if result[0] else 0
                 contract_uid = max(last_contract_uid + 1, self.uid_start)
+                conn.close()
 
             wrestler_data_list = []
             for wrestler in self.wrestlers:
@@ -503,7 +505,6 @@ class WrestleverseApp:
                     continue
 
             total_wrestlers = len(wrestler_data_list)
-
             for index, wrestler_data in enumerate(wrestler_data_list, start=1):
                 self.status_label.config(text=f"Status: Generating wrestler {index}/{total_wrestlers}...")
                 self.root.update_idletasks()
@@ -590,14 +591,14 @@ class WrestleverseApp:
 
                 style_num = self.get_style_from_gpt(bio) 
                 race = self.get_race_from_gpt(name, f"{description}\n\nBiography: {bio}")
+                picture_name = f"{name.replace(' ', '').lower()[:26]}.jpg"
 
-                # Roles, Languages, Body
                 roles_lang_body_prompt = (
                     f"Given the wrestler's name: {name}, description: {player_description if player_description else description}, and bio: {bio}, "
                     "provide a JSON response with the following:\n"
                     "- Boolean values for: Wrestler, OccasionalWrestler, Manager, OnScreenPersonality, PlayByPlayCommentator, ColourCommentator, Referee, RoadAgent\n"
                     "- Language fluencies (1-4) for English (always 4), Japanese, Spanish, French, Germanic, Mediterranean, Slavic, Hindi\n"
-                    "- A body type number (1-7) based on their description.\n\n"
+                    "- A body type number (1-7)\n\n"
                     "Return JSON only."
                 )
 
@@ -612,8 +613,7 @@ class WrestleverseApp:
                         )
                         roles_lang_body_content = roles_lang_body_response.choices[0].message.content.strip()
                         roles_lang_body_data = json.loads(roles_lang_body_content)
-                    except Exception as e:
-                        logging.error(f"Error getting roles/lang/body from GPT attempt {attempts}: {e}")
+                    except:
                         roles_lang_body_data = None
 
                 if roles_lang_body_data is None:
@@ -662,18 +662,7 @@ class WrestleverseApp:
                 speak_hindi = languages.get("Hindi", 1)
 
                 body_type_code = roles_lang_body_data.get("BodyType", 1)
-                body_type_map = {
-                    1: "Average",
-                    2: "Skinny",
-                    3: "Toned",
-                    4: "Muscular",
-                    5: "Ripped",
-                    6: "Flabby",
-                    7: "Obese"
-                }
-                body_type_text = body_type_map.get(body_type_code, "Average")
 
-                # Determine skill preset
                 if wrestler_data['skill_preset'] == "Interpret":
                     preset_name = self.select_skill_preset_with_chatgpt(
                         name,
@@ -687,9 +676,6 @@ class WrestleverseApp:
                 skills = self.generate_skills(uid, preset)
                 skills_data.append(skills)
 
-                # Generate Moveset now (before creating worker_row)
-                # Create a moveset record:
-                moveset_uid_val = None
                 move_conn_str = ""
                 if self.access_db_path and os.path.exists(self.access_db_path):
                     move_conn_str = (
@@ -697,7 +683,7 @@ class WrestleverseApp:
                         f'DBQ={self.access_db_path};'
                         'PWD=20YearsOfTEW;'
                     )
-                # Generate moves from GPT
+
                 moves_prompt = (
                     f"Generate three unique finishing moves for wrestler {name} (Gender: {gender}). "
                     "Each move should have a short unique name and a short description (max 75 chars). "
@@ -716,8 +702,7 @@ class WrestleverseApp:
                         )
                         moves_json_str = move_resp.choices[0].message.content.strip()
                         moves_data_gpt = json.loads(moves_json_str)
-                    except Exception as e:
-                        logging.error(f"Error generating moves from GPT attempt {attempts}: {e}")
+                    except:
                         moves_data_gpt = None
 
                 if moves_data_gpt is None:
@@ -727,13 +712,13 @@ class WrestleverseApp:
                         "UberFinisher": {"MoveName":"Extreme End","MoveDesc":"A rare, devastating move."}
                     }
 
+                moveset_uid_val = None
                 if move_conn_str:
                     move_conn = pyodbc.connect(move_conn_str)
                     move_cursor = move_conn.cursor()
                     move_cursor.execute("SELECT MAX(UID) FROM tblMoveSet")
                     result = move_cursor.fetchone()
                     moveset_uid_val = (result[0] if result[0] else 0) + 1
-                    # Insert into tblMoveSet
                     sql_insert_moveset = "INSERT INTO tblMoveSet ([UID],[recordName]) VALUES (?,?)"
                     move_cursor.execute(sql_insert_moveset, (moveset_uid_val, name))
                     move_conn.commit()
@@ -780,7 +765,6 @@ class WrestleverseApp:
                             )
                         )
 
-                        # Insert into tblMoveSetArsenal (the joining table)
                         move_cursor.execute("SELECT MAX(UID) FROM tblMoveSetArsenal")
                         result = move_cursor.fetchone()
                         moveset_entry_uid = (result[0] if result[0] else 0) + 1
@@ -796,8 +780,8 @@ class WrestleverseApp:
                     move_conn.commit()
                     move_conn.close()
 
-                # Now create worker_row after we have moveset_uid_val
-                # Set Moveset to moveset_uid_val
+                worker_moveset_val = moveset_uid_val if moveset_uid_val else 0
+
                 worker_row = {
                     "UID": int(uid),
                     "User": False,
@@ -818,7 +802,7 @@ class WrestleverseApp:
                     "WorkerWeight": random.randint(150,350),
                     "WorkerMinWeight": 150,
                     "WorkerMaxWeight": 350,
-                    "Picture": f"{name.replace(' ', '').lower()[:26]}.jpg",
+                    "Picture": picture_name,
                     "Nationality": int(1),
                     "Race": self.ensure_byte(race),
                     "Based_In": self.ensure_byte(1),
@@ -847,7 +831,7 @@ class WrestleverseApp:
                     "Speak_Med": int(speak_med),
                     "Speak_Slavic": int(speak_slavic),
                     "Speak_Hindi": int(speak_hindi),
-                    "Moveset": moveset_uid_val if moveset_uid_val else 0,
+                    "Moveset": worker_moveset_val,
                     "Position_Wrestler": position_wrestler,
                     "Position_Occasional": position_occasional,
                     "Position_Referee": position_referee,
@@ -888,7 +872,6 @@ class WrestleverseApp:
                         f"Description: {player_description if player_description else description}\n"
                         f"Gender: {gender}\n"
                         f"Race: {self.get_race_name(race)}\n"
-                        f"Body Type: {body_type_text}\n"
                         f"Please provide a single sentence describing their physical appearance. "
                         f"Focus on height, build, and distinctive features."
                     )
@@ -953,10 +936,7 @@ class WrestleverseApp:
                             )
                         """
 
-                        birth_date = worker_row["Birthday"]
-                        debut_date = worker_row["DebutDate"]
-                        death_date = "1666-01-01"
-                        worker_values = [
+                        cursor.execute(sql_insert_worker, [
                             int(worker_row_converted["UID"]),
                             bool(worker_row_converted["User"]),
                             int(worker_row_converted["Regen"]),
@@ -968,9 +948,9 @@ class WrestleverseApp:
                             int(worker_row_converted["Sexuality"]),
                             int(worker_row_converted["CompetesAgainst"]),
                             int(worker_row_converted["Outsiderel"]),
-                            birth_date,
-                            debut_date,
-                            death_date,
+                            worker_row["Birthday"],
+                            worker_row["DebutDate"],
+                            "1666-01-01",
                             int(worker_row_converted["BodyType"]),
                             int(worker_row_converted["WorkerHeight"]),
                             int(worker_row_converted["WorkerWeight"]),
@@ -1025,12 +1005,17 @@ class WrestleverseApp:
                             str(worker_row_converted["PlasterCaster_Heel"]),
                             int(worker_row_converted["PlasterCaster_HeelBasis"]),
                             int(worker_row_converted["CareerGoal"])
-                        ]
-                        cursor.execute(sql_insert_worker, worker_values)
+                        ])
 
-                    for bio_row in bio_data:
+                    cursor.execute("SELECT MAX(UID) FROM tblWorkerBio")
+                    result = cursor.fetchone()
+                    max_workerbio_uid = result[0] if result[0] else 0
+
+                    for b in bio_data:
+                        max_workerbio_uid += 1
+                        new_bio_val = [max_workerbio_uid, b[1]]
                         sql_insert_bio = "INSERT INTO tblWorkerBio ([UID], [Profile]) VALUES (?, ?)"
-                        cursor.execute(sql_insert_bio, bio_row)
+                        cursor.execute(sql_insert_bio, new_bio_val)
 
                     for skills_row in skills_data:
                         sql_insert_skills = """
@@ -1048,7 +1033,7 @@ class WrestleverseApp:
                                 ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                             )
                         """
-                        skills_values = [
+                        cursor.execute(sql_insert_skills, [
                             skills_row["WorkerUID"],
                             skills_row.get("Brawl", 0),
                             skills_row.get("Air", 0),
@@ -1091,10 +1076,15 @@ class WrestleverseApp:
                             skills_row.get("ScoutEnt", 0),
                             skills_row.get("ScoutBroadcast", 0),
                             skills_row.get("ScoutRef", 0)
-                        ]
-                        cursor.execute(sql_insert_skills, skills_values)
+                        ])
+
+                    cursor.execute("SELECT MAX(UID) FROM tblContract")
+                    result = cursor.fetchone()
+                    current_contract_max_uid = result[0] if result[0] else 0
 
                     for contract in contract_data:
+                        current_contract_max_uid += 1
+                        contract["UID"] = current_contract_max_uid
                         sql_insert_contract = """
                             INSERT INTO tblContract (
                                 [UID], [FedUID], [WorkerUID], [Name], [Shortname], [Picture], 
@@ -1129,7 +1119,7 @@ class WrestleverseApp:
                                 ?, ?, ?, ?
                             )
                         """
-                        contract_values = [
+                        cvals = [
                             contract["UID"],
                             contract["FedUID"],
                             contract["WorkerUID"],
@@ -1188,8 +1178,31 @@ class WrestleverseApp:
                             contract["PlasterCaster_Byte6"]
                         ]
                         for i in range(1, 26):
-                            contract_values.append(contract[f"PlasterCaster_Bool{i}"])
-                        cursor.execute(sql_insert_contract, contract_values)
+                            cvals.append(contract[f"PlasterCaster_Bool{i}"])
+                        cursor.execute(sql_insert_contract, cvals)
+
+                    # Insert popularity into tblWorkerOver (WorkerUID as PK)
+                    for worker_row in workers_data:
+                        worker_uid = worker_row["UID"]
+                        worker_name = ""
+                        worker_bio = ""
+                        for n in notes_data:
+                            if n["Name"][:30] == worker_row["Name"]:
+                                worker_name = n["Name"]
+                                break
+                        for b in bio_data:
+                            if b[0] == worker_uid:
+                                worker_bio = b[1]
+                                break
+
+                        popularity_categories = self.get_region_popularity_from_gpt(worker_name, worker_bio, description)
+                        popularity_values = self.convert_popularity_categories_to_values(popularity_categories)
+
+                        columns = ["WorkerUID"] + [f"Over{i}" for i in range(1,58)]
+                        placeholders = ", ".join(["?"] * 58)
+                        sql_insert_over = f"INSERT INTO tblWorkerOver ({', '.join(columns)}) VALUES ({placeholders})"
+                        over_values = [worker_uid] + popularity_values
+                        cursor.execute(sql_insert_over, over_values)
 
                     conn.commit()
                     conn.close()
@@ -1248,17 +1261,37 @@ class WrestleverseApp:
             self.status_label.config(text=f"Status: Error - {str(e)}")
             messagebox.showerror("Error", error_message)
 
-    def get_region_popularity_from_gpt(self, name, bio):
-        return {
-            "America": "Unknown",
-            "Canada": "Unknown",
-            "Mexico": "Unknown",
-            "British Isles": "Unknown",
-            "Japan": "Unknown",
-            "Europe": "Unknown",
-            "Oceania": "Unknown",
-            "India": "Unknown"
-        }
+    def get_region_popularity_from_gpt(self, name, bio, description):
+        prompt = (
+            f"Provide popularity categories for a wrestler named {name} with the bio {bio} with {description} regions in JSON format:\n\n"
+            "Regions:\n"
+            "America\nCanada\nMexico\nBritish Isles\nJapan\nEurope\nOceania\nIndia\n\n"
+            "The categories are: Unknown, Insignificant, Indie Popularity, Recognized, Well Known, Very Popular, Superstar.\n"
+            "Return JSON only."
+        )
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            content = response.choices[0].message.content.strip()
+            popularity_data = json.loads(content)
+            required_keys = ["America","Canada","Mexico","British Isles","Japan","Europe","Oceania","India"]
+            if all(key in popularity_data for key in required_keys):
+                return popularity_data
+            else:
+                return {r: "Unknown" for r in required_keys}
+        except:
+            return {
+                "America": "Unknown",
+                "Canada": "Unknown",
+                "Mexico": "Unknown",
+                "British Isles": "Unknown",
+                "Japan": "Unknown",
+                "Europe": "Unknown",
+                "Oceania": "Unknown",
+                "India": "Unknown"
+            }
 
     def convert_popularity_categories_to_values(self, categories):
         def range_for_category(cat):
@@ -1564,8 +1597,7 @@ class WrestleverseApp:
             except ValueError:
                 pass
             return 1
-        except Exception as e:
-            logging.error(f"Error getting style from GPT: {e}")
+        except:
             return 1
 
     def save_new_preset(self):
@@ -1894,8 +1926,7 @@ class WrestleverseApp:
                 messages=[{"role": "user", "content": prompt}]
             )
             return response.choices[0].message.content.strip()
-        except Exception as e:
-            logging.error(f"Error getting response from GPT: {e}", exc_info=True)
+        except:
             return ""
 
     def open_image_generator(self):
